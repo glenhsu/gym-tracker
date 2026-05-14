@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a1a2e">
+<title>🏋️ GymTracker</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0f1a;--surface:#1a1a2e;--surface2:#222240;--surface3:#2a2a4a;
+  --primary:#6c63ff;--primary-light:#8b83ff;--accent:#00d4aa;
+  --danger:#ff4757;--warning:#ffa502;
+  --text:#e8e8f0;--text2:#a0a0b8;--text3:#6a6a82;--border:#2e2e50;
+  --radius:12px;--radius-sm:8px;--radius-xs:6px;
+  --shadow:0 4px 20px rgba(0,0,0,0.3);
+  --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)
+}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC','PingFang TC',sans-serif;
+  background:var(--bg);color:var(--text);font-size:15px;line-height:1.5;
+  -webkit-tap-highlight-color:transparent;user-select:none
+}
+button,input,select,textarea{font-family:inherit;font-size:inherit;outline:none;border:none}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+input,select{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:var(--radius-xs);padding:10px 12px;width:100%}
+select{appearance:none;-webkit-appearance:none}
+input:focus{outline:2px solid var(--primary);outline-offset:-2px}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.app-container{height:100vh;height:100dvh;display:flex;flex-direction:column;padding-top:calc(10px + var(--safe-top))}
+.app-header{padding:8px 16px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.app-header h1{font-size:18px;font-weight:700}
+.app-header h1 span{color:var(--primary)}
+.header-actions{display:flex;gap:6px}
+.icon-btn{width:36px;height:36px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:17px;transition:background .15s}
+.icon-btn:active{background:var(--surface3)}
+
+/* TABS */
+.tab-bar{display:flex;padding:0 12px;gap:4px;flex-shrink:0;margin-bottom:6px}
+.tab-bar button{flex:1;padding:8px 6px;background:transparent;color:var(--text2);font-size:12px;font-weight:600;border-radius:var(--radius-sm) var(--radius-sm) 0 0;border-bottom:2px solid transparent;transition:all .2s}
+.tab-bar button.active{color:var(--primary);border-bottom-color:var(--primary);background:rgba(108,99,255,0.05)}
+
+/* PAGES */
+.page{flex:1;overflow-y:auto;padding:0 12px calc(80px + var(--safe-bottom));display:none;-webkit-overflow-scrolling:touch}
+.page.active{display:block}
+
+/* PROGRESS BAR */
+.progress-wrap{background:var(--surface2);border-radius:20px;height:6px;margin:0 0 8px;overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:20px;transition:width .3s ease}
+.progress-label{font-size:11px;color:var(--text3);text-align:center;margin-bottom:4px}
+
+/* REST TIMER OVERLAY */
+.timer-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:1000;background:rgba(0,0,0,0.85);justify-content:center;align-items:center;flex-direction:column;gap:16px;backdrop-filter:blur(8px)}
+.timer-overlay.show{display:flex}
+.timer-display{font-size:64px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:3px;color:var(--primary);transition:color .3s}
+.timer-display.warning{color:var(--warning)}
+.timer-display.danger{color:var(--danger)}
+.timer-label{font-size:13px;color:var(--text2);margin-top:-6px}
+.timer-controls{display:flex;gap:12px;margin-top:8px}
+.timer-controls button{padding:12px 28px;border-radius:50px;font-size:15px;font-weight:700;transition:transform .1s}
+.timer-controls button:active{transform:scale(0.95)}
+.btn-timer-stop{background:var(--danger);color:#fff}
+.btn-timer-skip{background:var(--surface2);color:var(--text2)}
+.timer-presets{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.timer-presets button{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;background:var(--surface2);color:var(--text2);border:1px solid var(--border);transition:all .15s}
+.timer-presets button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* WORKOUT PAGE */
+.workout-select-menu{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.workout-select-menu button{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;background:var(--surface2);color:var(--text2);border:1px solid var(--border);transition:all .15s}
+.workout-select-menu button:active{transform:scale(0.95)}
+.workout-select-menu button.btn-start{background:var(--accent);color:#000;border-color:var(--accent)}
+.workout-status{font-size:13px;color:var(--text2);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+
+/* SWIPE CONTAINER */
+.swipe-container{position:relative;overflow:hidden;touch-action:pan-y}
+.exercise-cards-wrap{display:flex;transition:transform .3s ease;will-change:transform}
+.exercise-cards-wrap.swiping{transition:none}
+
+/* EXERCISE CARD (FULL WIDTH) */
+.exercise-card{min-width:100%;background:var(--surface);border-radius:var(--radius);padding:14px;border:1px solid var(--border)}
+.exercise-card.current{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary)}
+.exercise-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.exercise-name{font-size:17px;font-weight:700}
+.exercise-1rm{font-size:11px;color:var(--accent);font-weight:600;margin-top:1px}
+.ex-complete-badge{font-size:11px;color:var(--accent);background:rgba(0,212,170,0.12);padding:2px 10px;border-radius:10px;font-weight:600}
+
+/* DOTS NAV */
+.dots-nav{display:flex;justify-content:center;gap:6px;padding:6px 0 10px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:all .2s}
+.dot.active{background:var(--primary);width:20px;border-radius:4px}
+.dot.done{background:var(--accent)}
+
+/* SET ROW — 大按鈕風格 */
+.set-row{
+  display:grid;
+  grid-template-columns:28px 1fr 48px 44px;
+  gap:6px;
+  align-items:center;
+  padding:8px 0;
+  border-bottom:1px solid var(--border);
+}
+.set-row:last-child{border-bottom:none}
+.set-row.done{opacity:0.5}
+.set-num{font-size:12px;font-weight:600;color:var(--text3);text-align:center}
+.set-row input{padding:8px 6px;text-align:center;font-size:15px;font-weight:700;border-radius:var(--radius-sm);height:42px}
+.set-row input:disabled{opacity:0.4}
+
+/* BIG CHECK BUTTON */
+.btn-check-set{
+  width:44px;height:44px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;
+  background:var(--surface2);
+  color:var(--text3);
+  border:2px solid var(--border);
+  transition:all .15s;
+  cursor:pointer;
+}
+.btn-check-set:active{transform:scale(0.9)}
+.btn-check-set.done{
+  background:var(--accent);
+  color:#000;
+  border-color:var(--accent);
+}
+.btn-check-set.current{
+  background:var(--primary);
+  color:#fff;
+  border-color:var(--primary);
+}
+
+/* ADD SET BUTTON */
+.btn-add-set{
+  width:100%;
+  padding:10px;
+  margin-top:6px;
+  background:var(--surface2);
+  color:var(--text2);
+  border-radius:var(--radius-sm);
+  font-size:14px;
+  font-weight:600;
+  border:1px dashed var(--border);
+  transition:all .15s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+}
+.btn-add-set:active{background:var(--surface3);color:var(--primary)}
+
+/* FINISH BUTTON (floating) */
+.finish-bar{
+  position:sticky;
+  bottom:0;
+  background:var(--bg);
+  padding:10px 0 calc(10px + var(--safe-bottom));
+  border-top:1px solid var(--border);
+  margin-top:auto;
+}
+.btn-finish{
+  width:100%;
+  padding:14px;
+  border-radius:var(--radius);
+  background:linear-gradient(135deg,var(--accent),#00e6b8);
+  color:#000;
+  font-size:17px;
+  font-weight:800;
+  transition:transform .1s;
+  box-shadow:0 4px 20px rgba(0,212,170,0.3);
+}
+.btn-finish:active{transform:scale(0.97)}
+
+/* EXERCISES PAGE */
+.exercise-list-item{background:var(--surface);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border)}
+.exercise-list-item .ex-name{font-weight:600;font-size:15px}
+.exercise-list-item .ex-category{font-size:11px;color:var(--text3);margin-top:2px}
+.exercise-list-item .ex-controls{display:flex;gap:6px}
+.exercise-list-item .ex-controls button{padding:4px 10px;border-radius:12px;font-size:11px}
+.btn-edit-ex{background:var(--surface2);color:var(--text2)}
+.btn-del-ex{background:rgba(255,71,87,0.15);color:var(--danger)}
+
+/* TEMPLATES PAGE */
+.template-card{background:var(--surface);border-radius:var(--radius);padding:14px;margin-bottom:10px;border:1px solid var(--border)}
+.template-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.template-name{font-size:16px;font-weight:700}
+.template-ex-count{font-size:11px;color:var(--text3)}
+.template-actions{display:flex;gap:6px}
+.template-actions button{padding:4px 10px;border-radius:12px;font-size:11px;background:var(--surface2);color:var(--text2)}
+.btn-start-tpl{background:var(--accent)!important;color:#000!important;font-weight:700}
+.template-exercises{display:flex;flex-wrap:wrap;gap:4px}
+.template-exercises span{font-size:11px;padding:3px 10px;background:var(--surface2);border-radius:12px;color:var(--text2)}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:500;background:rgba(0,0,0,0.7);justify-content:flex-end;align-items:flex-end}
+.modal-overlay.show{display:flex}
+.modal-sheet{width:100%;max-height:92vh;background:var(--surface);border-radius:var(--radius) var(--radius) 0 0;padding:16px 20px calc(20px + var(--safe-bottom));overflow-y:auto;animation:slideUp .25s ease-out}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:4px;text-align:center}
+.modal-subtitle{font-size:13px;color:var(--text3);text-align:center;margin-bottom:16px}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 12px}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-size:13px;font-weight:600;color:var(--text2);margin-bottom:4px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn-primary{width:100%;padding:14px;border-radius:var(--radius-sm);background:var(--primary);color:#fff;font-size:16px;font-weight:700;transition:transform .1s}
+.btn-primary:active{transform:scale(0.98)}
+.btn-secondary{width:100%;padding:12px;border-radius:var(--radius-sm);background:var(--surface2);color:var(--text2);font-size:14px;font-weight:600;margin-top:8px}
+
+/* HISTORY */
+.history-item{background:var(--surface);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;border:1px solid var(--border)}
+.history-date{font-size:13px;font-weight:600;color:var(--primary);margin-bottom:4px}
+.history-name{font-size:15px;font-weight:700}
+.history-summary{font-size:11px;color:var(--text2);margin-top:2px}
+.history-detail{margin-top:8px;padding-top:6px;border-top:1px solid var(--border);font-size:12px;color:var(--text3)}
+
+/* EMPTY STATES */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3)}
+.empty-state .big-icon{font-size:48px;margin-bottom:12px}
+.empty-state p{font-size:14px;margin-bottom:4px}
+.empty-state p.sub{font-size:12px;color:var(--text3)}
+
+/* CELEBRATION */
+.celebration{
+  text-align:center;padding:30px 20px;
+  animation:fadeIn .3s ease;
+}
+.celebration .big{font-size:60px;margin-bottom:12px}
+.celebration h2{font-size:22px;margin-bottom:6px;color:var(--accent)}
+.celebration p{font-size:13px;color:var(--text2);margin-bottom:4px}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:calc(100px + var(--safe-bottom));left:50%;transform:translateX(-50%);
+  background:var(--surface);color:var(--text);padding:10px 20px;border-radius:30px;
+  font-size:13px;font-weight:600;z-index:999;
+  box-shadow:0 4px 20px rgba(0,0,0,0.4);
+  border:1px solid var(--border);
+  opacity:0;transition:opacity .2s;
+  pointer-events:none;
+  white-space:nowrap;
+}
+.toast.show{opacity:1}
+
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<div class="timer-overlay" id="timerOverlay">
+  <div class="timer-display" id="timerDisplay">01:00</div>
+  <div class="timer-label">⏱ 休息中</div>
+  <div class="timer-presets" id="timerPresets">
+    <button data-sec="30">30s</button>
+    <button data-sec="60" class="active">60s</button>
+    <button data-sec="90">90s</button>
+    <button data-sec="120">120s</button>
+    <button data-sec="180">180s</button>
+    <button data-sec="300">5min</button>
+  </div>
+  <div class="timer-controls">
+    <button class="btn-timer-stop" onclick="stopTimer()">✕ 關閉</button>
+    <button class="btn-timer-skip" onclick="skipTimer()">⏭ 跳過</button>
+  </div>
+</div>
+
+<div class="app-container">
+  <header class="app-header">
+    <h1><span>🏋️</span> GymTracker</h1>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="exportAllData()" title="匯出備份">📤</button>
+      <button class="icon-btn" onclick="document.getElementById('importInput').click()" title="匯入備份">📥</button>
+      <input type="file" id="importInput" accept=".json" style="display:none" onchange="importAllData(event)">
+    </div>
+  </header>
+
+  <nav class="tab-bar" id="tabBar">
+    <button class="active" data-tab="tabWorkout" onclick="switchTab('tabWorkout',this)">💪 訓練</button>
+    <button data-tab="tabExercises" onclick="switchTab('tabExercises',this)">🏋️ 動作</button>
+    <button data-tab="tabTemplates" onclick="switchTab('tabTemplates',this)">📋 菜單</button>
+    <button data-tab="tabHistory" onclick="switchTab('tabHistory',this)">📊 紀錄</button>
+  </nav>
+
+  <div class="page active" id="tabWorkout">
+    <div class="workout-select-menu" id="workoutSelectMenu"></div>
+
+    <div class="empty-state" id="workoutEmpty">
+      <div class="big-icon">🏋️</div>
+      <p>選擇菜單開始訓練</p>
+      <p class="sub">或點「⚡ 自由訓練」</p>
+    </div>
+
+    <div id="workoutActive" style="display:none">
+      <div class="progress-label" id="progressLabel"></div>
+      <div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+      <div class="workout-status">
+        <span id="workoutNameSpan"></span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span id="workoutSetsSpan" style="font-size:11px;color:var(--text3)"></span>
+          <button id="btnFinishSmall" style="padding:4px 12px;border-radius:16px;background:var(--accent);color:#000;font-size:12px;font-weight:700" onclick="showFinishConfirm()">✓ 結束</button>
+        </div>
+      </div>
+
+      <!-- SWIPE CONTAINER -->
+      <div class="swipe-container" id="swipeContainer">
+        <div class="exercise-cards-wrap" id="exerciseCardsWrap">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+      <div class="dots-nav" id="dotsNav"></div>
+    </div>
+  </div>
+
+  <div class="page" id="tabExercises">
+    <div style="margin-bottom:10px"><button class="btn-primary" onclick="showModal('exerciseModal')">＋ 新增動作</button></div>
+    <div id="exerciseList"></div>
+  </div>
+
+  <div class="page" id="tabTemplates">
+    <div style="margin-bottom:10px"><button class="btn-primary" onclick="showModal('templateModal')">＋ 新增菜單</button></div>
+    <div id="templateList"></div>
+  </div>
+
+  <div class="page" id="tabHistory">
+    <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button class="icon-btn" onclick="clearHistory()" style="font-size:12px;padding:8px 14px;border-radius:20px;background:var(--surface2);color:var(--text2)">🗑 清除</button>
+    </div>
+    <div id="historyList"></div>
+    <div id="historyCharts" style="margin-top:12px"></div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="exerciseModal" onclick="closeModalIfOutside(event,'exerciseModal')">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="exerciseModalTitle">🏋️ 新增動作</div>
+    <div class="form-group">
+      <label>動作名稱</label>
+      <input id="exerciseNameInput" placeholder="e.g. 槓鈴臥推">
+    </div>
+    <div class="form-group">
+      <label>分類</label>
+      <select id="exerciseCategoryInput">
+        <option value="chest">胸</option>
+        <option value="back">背</option>
+        <option value="shoulders">肩</option>
+        <option value="legs">腿</option>
+        <option value="arms">手臂</option>
+        <option value="core">核心</option>
+        <option value="fullbody">全身</option>
+        <option value="other" selected>其他</option>
+      </select>
+    </div>
+    <button class="btn-primary" onclick="saveExercise()">確認</button>
+    <button class="btn-secondary" onclick="closeModal('exerciseModal')">取消</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="templateModal" onclick="closeModalIfOutside(event,'templateModal')">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="templateModalTitle">📋 新增菜單</div>
+    <div class="form-group">
+      <label>菜單名稱</label>
+      <input id="templateNameInput" placeholder="e.g. 推日">
+    </div>
+    <div class="form-group">
+      <label>選擇動作</label>
+      <div id="templateExerciseSelector" style="max-height:200px;overflow-y:auto;gap:4px;display:flex;flex-wrap:wrap;"></div>
+    </div>
+    <button class="btn-primary" onclick="saveTemplate()">確認</button>
+    <button class="btn-secondary" onclick="closeModal('templateModal')">取消</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="finishConfirmModal" onclick="closeModalIfOutside(event,'finishConfirmModal')">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">✅ 結束訓練？</div>
+    <div class="modal-subtitle" id="finishSummary"></div>
+    <button class="btn-primary" style="background:var(--accent);color:#000" onclick="finishWorkout()">✅ 儲存並結束</button>
+    <button class="btn-secondary" onclick="closeModal('finishConfirmModal')">繼續訓練</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ================================================================
+// DATA LAYER
+// ================================================================
+const KEYS={exercises:'gym_exercises',templates:'gym_templates',history:'gym_history',lastWeights:'gym_last_weights'}
+function ld(k){try{return JSON.parse(localStorage.getItem(k))||[]}catch{return[]}}
+function sv(k,d){localStorage.setItem(k,JSON.stringify(d))}
+
+let state={
+  exercises: ld(KEYS.exercises),
+  templates: ld(KEYS.templates),
+  history: ld(KEYS.history),
+  lastWeights: ld(KEYS.lastWeights), // {"exName_kg": latestKg, "exName_reps": latestReps}
+  currentWorkout: null,
+  editExId: null,
+  editTplId: null,
+  currentExIdx: 0 // which exercise is showing
+}
+
+// ================================================================
+// TIMER
+// ================================================================
+let timerInt=null,timerRem=60,timerTot=60,timerPreset=60
+let timerCallback=null // called when timer finishes
+
+function startTimer(sec,cb){
+  if(timerInt){clearInterval(timerInt);timerInt=null}
+  timerTot=timerRem=sec;timerCallback=cb||null
+  updateTimerDisp()
+  document.getElementById('timerOverlay').classList.add('show')
+  runTimer()
+}
+function updateTimerDisp(){
+  const d=document.getElementById('timerDisplay')
+  const m=Math.floor(timerRem/60),s=timerRem%60
+  d.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+  d.className='timer-display'
+  if(timerRem<=5)d.classList.add('danger')
+  else if(timerRem<=15)d.classList.add('warning')
+}
+function runTimer(){
+  if(timerInt)return
+  updateTimerDisp()
+  timerInt=setInterval(()=>{
+    timerRem--;updateTimerDisp()
+    if(timerRem<=3&&timerRem>0)playBeep(880,80)
+    if(timerRem<=0){
+      clearInterval(timerInt);timerInt=null
+      timerFinished()
+    }
+  },1000)
+}
+function stopTimer(){
+  if(timerInt){clearInterval(timerInt);timerInt=null}
+  document.getElementById('timerOverlay').classList.remove('show')
+  timerCallback=null
+}
+function skipTimer(){stopTimer()}
+function timerFinished(){
+  playBeep(440,200);setTimeout(()=>playBeep(660,200),250);setTimeout(()=>playBeep(880,400),500)
+  if(navigator.vibrate)navigator.vibrate([100,100,100,100,300])
+  const cb=timerCallback;timerCallback=null
+  if(typeof cb==='function')setTimeout(cb,200)
+}
+
+document.addEventListener('click',function(e){
+  const btn=e.target.closest('#timerPresets button')
+  if(!btn)return
+  document.querySelectorAll('#timerPresets button').forEach(b=>b.classList.remove('active'))
+  btn.classList.add('active')
+  timerPreset=parseInt(btn.dataset.sec)
+  if(!timerInt){timerRem=timerTot=timerPreset;updateTimerDisp()}
+})
+
+function playBeep(freq,dur){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)()
+    const osc=ctx.createOscillator();const gain=ctx.createGain()
+    osc.type='sine';osc.frequency.value=freq;gain.gain.value=0.15
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur/1000)
+    osc.connect(gain);gain.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+dur/1000)
+  }catch(e){}
+}
+
+function toast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show')
+  clearTimeout(t._toast);t._toast=setTimeout(()=>t.classList.remove('show'),2000)
+}
+
+// ================================================================
+// 1RM CALC
+// ================================================================
+function estimate1RM(kg,reps){
+  if(!kg||!reps||reps<1)return null
+  if(reps===1)return kg
+  return Math.round(kg*(1+reps/30)*10)/10
+}
+
+// ================================================================
+// TABS
+// ================================================================
+function switchTab(tabId,btn){
+  document.querySelectorAll('.tab-bar button').forEach(b=>b.classList.remove('active'))
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))
+  btn.classList.add('active')
+  document.getElementById(tabId).classList.add('active')
+  if(tabId==='tabWorkout')renderWorkout()
+  if(tabId==='tabExercises')renderExercises()
+  if(tabId==='tabTemplates')renderTemplates()
+  if(tabId==='tabHistory')renderHistory()
+}
+
+// ================================================================
+// MODALS
+// ================================================================
+function showModal(id){document.getElementById(id).classList.add('show')}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+function closeModalIfOutside(e,id){if(!e.target.closest('.modal-sheet'))closeModal(id)}
+
+// ================================================================
+// EXERCISES CRUD
+// ================================================================
+function renderExercises(){
+  const c=document.getElementById('exerciseList'),ex=state.exercises
+  if(!ex.length){c.innerHTML='<div class="empty-state"><div class="big-icon">🏋️</div><p>還沒有動作</p><p class="sub">點上方新增</p></div>';return}
+  const catNames={chest:'胸',back:'背',shoulders:'肩',legs:'腿',arms:'手臂',core:'核心',fullbody:'全身',other:'其他'}
+  c.innerHTML=ex.map((e,i)=>`
+    <div class="exercise-list-item">
+      <div><div class="ex-name">${esc(e.name)}</div><div class="ex-category">${catNames[e.category]||e.category}</div></div>
+      <div class="ex-controls"><button class="btn-edit-ex" onclick="editExercise(${i})">✏️</button><button class="btn-del-ex" onclick="delEx(${i})">✕</button></div>
+    </div>
+  `).join('')
+}
+function saveExercise(){
+  const name=document.getElementById('exerciseNameInput').value.trim()
+  const cat=document.getElementById('exerciseCategoryInput').value
+  if(!name){toast('請輸入動作名稱');return}
+  if(state.editExId!==null)state.exercises[state.editExId]={name,category}
+  else state.exercises.push({name,category})
+  state.editExId=null
+  sv(KEYS.exercises,state.exercises)
+  document.getElementById('exerciseNameInput').value=''
+  document.getElementById('exerciseCategoryInput').value='other'
+  closeModal('exerciseModal')
+  renderExercises();renderTemplates()
+}
+function editExercise(i){
+  state.editExId=i
+  const e=state.exercises[i]
+  document.getElementById('exerciseModalTitle').textContent='✏️ 編輯動作'
+  document.getElementById('exerciseNameInput').value=e.name
+  document.getElementById('exerciseCategoryInput').value=e.category
+  showModal('exerciseModal')
+}
+function delEx(i){
+  if(!confirm(`確定刪除「${state.exercises[i].name}」？`))return
+  state.exercises.splice(i,1)
+  sv(KEYS.exercises,state.exercises)
+  renderExercises();renderTemplates()
+}
+document.addEventListener('click',function(e){
+  const b=e.target.closest('#tabExercises .btn-primary')
+  if(b&&b.textContent.includes('新增動作')){
+    state.editExId=null
+    document.getElementById('exerciseModalTitle').textContent='🏋️ 新增動作'
+    document.getElementById('exerciseNameInput').value=''
+    document.getElementById('exerciseCategoryInput').value='other'
+  }
+})
+
+// ================================================================
+// TEMPLATES CRUD
+// ================================================================
+function renderTemplates(){
+  const c=document.getElementById('templateList'),tpls=state.templates
+  if(!tpls.length){c.innerHTML='<div class="empty-state"><div class="big-icon">📋</div><p>還沒有菜單</p><p class="sub">點上方新增</p></div>';return}
+  c.innerHTML=tpls.map((t,i)=>`
+    <div class="template-card">
+      <div class="template-header">
+        <div><div class="template-name">${esc(t.name)}</div><div class="template-ex-count">${t.exercises.length} 個動作</div></div>
+        <div class="template-actions">
+          <button class="btn-start-tpl" onclick="startTemplateWorkout(${i})">▶ 開始</button>
+          <button onclick="editTemplate(${i})">✏️</button>
+          <button onclick="delTpl(${i})">✕</button>
+        </div>
+      </div>
+      <div class="template-exercises">${t.exercises.map(e=>`<span>${esc(e.name)}</span>`).join('')}</div>
+    </div>
+  `).join('')
+}
+function saveTemplate(){
+  const name=document.getElementById('templateNameInput').value.trim()
+  const checked=document.querySelectorAll('#templateExerciseSelector input:checked')
+  const selected=Array.from(checked).map(c=>c.value)
+  if(!name){toast('請輸入菜單名稱');return}
+  if(!selected.length){toast('請選擇至少一個動作');return}
+  const exercises=selected.map(id=>{
+    const ex=state.exercises.find(e=>e.id===id)
+    return ex?{name:ex.name,category:ex.category,sets:[{kg:'',reps:'',done:false}]}:null
+  }).filter(Boolean)
+  const tpl={name,exercises}
+  if(state.editTplId!==null)state.templates[state.editTplId]=tpl
+  else state.templates.push(tpl)
+  state.editTplId=null
+  sv(KEYS.templates,state.templates)
+  closeModal('templateModal')
+  renderTemplates()
+}
+function editTemplate(i){
+  state.editTplId=i;const t=state.templates[i]
+  document.getElementById('templateModalTitle').textContent='✏️ 編輯菜單'
+  document.getElementById('templateNameInput').value=t.name
+  renderTemplateSelector()
+  t.exercises.forEach(e=>{
+    const found=state.exercises.find(x=>x.name===e.name)
+    if(found){const cb=document.querySelector(`#templateExerciseSelector input[value="${found.id}"]`);if(cb)cb.checked=true}
+  })
+  showModal('templateModal')
+}
+function delTpl(i){
+  if(!confirm(`確定刪除「${state.templates[i].name}」？`))return
+  state.templates.splice(i,1)
+  sv(KEYS.templates,state.templates)
+  renderTemplates()
+}
+document.addEventListener('click',function(e){
+  const b=e.target.closest('#tabTemplates .btn-primary')
+  if(b&&b.textContent.includes('新增菜單')){
+    state.editTplId=null
+    document.getElementById('templateModalTitle').textContent='📋 新增菜單'
+    document.getElementById('templateNameInput').value=''
+    renderTemplateSelector()
+  }
+})
+function renderTemplateSelector(){
+  const c=document.getElementById('templateExerciseSelector'),ex=state.exercises
+  if(!ex.length){c.innerHTML='<span style="color:var(--text3);font-size:13px;">請先新增動作</span>';return}
+  ex.forEach((e,i)=>{if(!e.id)e.id='ex_'+Date.now()+'_'+i})
+  sv(KEYS.exercises,ex)
+  c.innerHTML=ex.map(e=>`<label style="display:flex;align-items:center;gap:4px;padding:4px 8px;background:var(--surface2);border-radius:16px;font-size:13px;cursor:pointer"><input type="checkbox" value="${e.id}">${esc(e.name)}</label>`).join('')
+}
+
+// ================================================================
+// WORKOUT - CORE
+// ================================================================
+/** Get the last recorded weight/reps for an exercise */
+function getLastWeight(exName){
+  const w=state.lastWeights
+  return{kg:w?.[exName+'_kg']||'',reps:w?.[exName+'_reps']||''}
+}
+function saveLastWeight(exName,kg,reps){
+  state.lastWeights[exName+'_kg']=kg
+  state.lastWeights[exName+'_reps']=reps
+  sv(KEYS.lastWeights,state.lastWeights)
+}
+
+/** Count total/done sets */
+function countSets(exercises){
+  let total=0,done=0
+  exercises.forEach(e=>{(e.sets||[]).forEach(s=>{total++;if(s.done)done++})})
+  return{total,done}
+}
+
+/** Find first undone set position */
+function firstUndone(exercises){
+  for(let i=0;i<exercises.length;i++){
+    if(!exercises[i].sets)continue
+    for(let j=0;j<exercises[i].sets.length;j++){
+      if(!exercises[i].sets[j].done)return{exIdx:i,setIdx:j}
+    }
+  }
+  return null
+}
+
+function calcEx1RM(ex){
+  if(!ex.sets||!ex.sets.length)return null
+  let best=null
+  ex.sets.forEach(s=>{
+    const kg=parseFloat(s.kg),reps=parseInt(s.reps)
+    if(kg&&reps&&reps>0){const est=estimate1RM(kg,reps);if(est&&(!best||est>best))best=est}
+  })
+  return best
+}
+
+// ================================================================
+// RENDER WORKOUT
+// ================================================================
+function renderWorkout(){
+  const w=state.currentWorkout,empty=document.getElementById('workoutEmpty')
+  const active=document.getElementById('workoutActive')
+  const menu=document.getElementById('workoutSelectMenu')
+
+  // Menu
+  let menuHTML='<button class="btn-start" onclick="startEmpty()">⚡ 自由訓練</button>'
+  state.templates.forEach((t,i)=>{menuHTML+=`<button onclick="startTemplateWorkout(${i})">${esc(t.name)}</button>`})
+  menu.innerHTML=menuHTML
+
+  if(!w){
+    empty.style.display='block'
+    active.style.display='none'
+    return
+  }
+
+  empty.style.display='none'
+  active.style.display='block'
+
+  const exs=w.exercises
+  document.getElementById('workoutNameSpan').textContent=w.name||'⚡ 自由訓練'
+
+  const cs=countSets(exs)
+  document.getElementById('workoutSetsSpan').textContent=`${cs.done}/${cs.total} 組`
+  const pct=cs.total>0?Math.round(cs.done/cs.total*100):0
+  document.getElementById('progressLabel').textContent=cs.done===cs.total?'🎉 全部完成！'+`${pct}%`:`${pct}% 完成`
+  document.getElementById('progressBar').style.width=pct+'%'
+
+  // Find first undone
+  const fu=firstUndone(exs)
+  state.currentExIdx=fu?fu.exIdx:0
+
+  // Build cards
+  const wrap=document.getElementById('exerciseCardsWrap')
+  wrap.innerHTML=exs.map((e,ei)=>{
+    const isCurrent=ei===state.currentExIdx
+    const allDone=e.sets&&e.sets.length&&e.sets.every(s=>s.done)
+    const ex1rm=calcEx1RM(e)
+    return`<div class="exercise-card${isCurrent?' current':''}">
+      <div class="exercise-header">
+        <div>
+          <div class="exercise-name">${esc(e.name)}</div>
+          ${ex1rm!==null?`<div class="exercise-1rm">1RM: ${ex1rm} kg</div>`:''}
+        </div>
+        ${allDone?`<div class="ex-complete-badge">✓ 完成</div>`:`<button class="icon-btn" style="width:32px;height:32px;font-size:14px" onclick="showEditSets(${ei})">✏️</button>`}
+      </div>
+      ${(e.sets||[]).map((s,si)=>{
+        const isThis=fu&&fu.exIdx===ei&&fu.setIdx===si
+        return`<div class="set-row${s.done?' done':''}">
+          <div class="set-num">${si+1}</div>
+          <input type="number" inputmode="decimal" step="0.5" min="0"
+            value="${s.kg||''}" placeholder="kg"
+            onfocus="onSetFocus(this)" onchange="updateSet(${ei},${si},'kg',this.value)"
+            ${s.done?'disabled':''}>
+          <input type="number" inputmode="numeric" step="1" min="0"
+            value="${s.reps||''}" placeholder="次"
+            onfocus="onSetFocus(this)" onchange="updateSet(${ei},${si},'reps',this.value)"
+            ${s.done?'disabled':''}>
+          <div class="btn-check-set${s.done?' done':''}${isThis?' current':''}"
+            onclick="toggleSet(${ei},${si})">${s.done?'✓':''}</div>
+        </div>`
+      }).join('')}
+      <button class="btn-add-set" onclick="addSet(${ei})">＋ 新增</button>
+    </div>`
+  }).join('')
+
+  // Dots
+  document.getElementById('dotsNav').innerHTML=exs.map((e,ei)=>{
+    const allDone=e.sets&&e.sets.every(s=>s.done)
+    return`<div class="dot${ei===state.currentExIdx?' active':''}${allDone?' done':''}"></div>`
+  }).join('')
+
+  // Swipe to first undone
+  if(fu)state.currentExIdx=fu.exIdx
+  updateSwipe()
+}
+
+function onSetFocus(input){
+  // Select all text on focus for easy replace
+  input.select()
+}
+
+// ================================================================
+// SWIPE
+// ================================================================
+let swipeStartX=0,swipeDelta=0,swiping=false
+
+function setupSwipe(){
+  const c=document.getElementById('swipeContainer')
+  if(!c)return
+  c.addEventListener('touchstart',e=>{
+    if(e.touches.length!==1)return
+    swipeStartX=e.touches[0].clientX;swipeDelta=0;swiping=true
+    document.getElementById('exerciseCardsWrap').classList.add('swiping')
+  },{passive:true})
+  c.addEventListener('touchmove',e=>{
+    if(!swiping||e.touches.length!==1)return
+    swipeDelta=e.touches[0].clientX-swipeStartX
+    updateSwipeOffset()
+  },{passive:true})
+  c.addEventListener('touchend',()=>{
+    if(!swiping)return
+    swiping=false
+    document.getElementById('exerciseCardsWrap').classList.remove('swiping')
+    const threshold=80
+    if(swipeDelta<-threshold&&state.currentExIdx<state.currentWorkout.exercises.length-1){
+      state.currentExIdx++
+    }else if(swipeDelta>threshold&&state.currentExIdx>0){
+      state.currentExIdx--
+    }
+    updateSwipe()
+    renderDots()
+  })
+}
+
+function updateSwipeOffset(){
+  const wrap=document.getElementById('exerciseCardsWrap')
+  if(!wrap)return
+  const ex=state.currentWorkout.exercises.length
+  const offset=-state.currentExIdx*100
+  const extra=ex>1?swipeDelta/wrap.parentElement.offsetWidth*100:0
+  wrap.style.transform=`translateX(${offset+extra}%)`
+}
+
+function updateSwipe(){
+  const wrap=document.getElementById('exerciseCardsWrap')
+  if(!wrap)return
+  wrap.style.transform=`translateX(-${state.currentExIdx*100}%)`
+  highlightCurrent()
+}
+
+function highlightCurrent(){
+  document.querySelectorAll('.exercise-card').forEach((c,i)=>{
+    c.classList.toggle('current',i===state.currentExIdx)
+  })
+}
+
+function renderDots(){
+  const dots=document.querySelectorAll('.dot')
+  const exs=state.currentWorkout?.exercises||[]
+  dots.forEach((d,i)=>{
+    d.classList.toggle('active',i===state.currentExIdx)
+    d.classList.toggle('done',exs[i]?.sets&&exs[i].sets.every(s=>s.done))
+  })
+}
+
+// ================================================================
+// WORKOUT ACTIONS
+// ================================================================
+function updateSet(ei,si,field,val){
+  if(!state.currentWorkout)return
+  const ex=state.currentWorkout.exercises[ei]
+  if(!ex||!ex.sets||!ex.sets[si])return
+  ex.sets[si][field]=val
+  // Don't re-render on every keystroke — will be handled by toggleSet
+  updateProgressOnly()
+}
+
+function updateProgressOnly(){
+  const w=state.currentWorkout
+  if(!w)return
+  const cs=countSets(w.exercises)
+  document.getElementById('workoutSetsSpan').textContent=`${cs.done}/${cs.total} 組`
+  const pct=cs.total>0?Math.round(cs.done/cs.total*100):0
+  document.getElementById('progressLabel').textContent=cs.done===cs.total?'🎉 全部完成！':`${pct}% 完成`
+  document.getElementById('progressBar').style.width=pct+'%'
+}
+
+function toggleSet(ei,si){
+  const w=state.currentWorkout
+  if(!w)return
+  const ex=w.exercises[ei]
+  if(!ex||!ex.sets||!ex.sets[si])return
+  const set=ex.sets[si]
+
+  // Toggle done
+  const wasDone=set.done
+  set.done=!set.done
+
+  if(set.done&&!wasDone){
+    // Save as "last weight" for future prefills
+    const kg=parseFloat(set.kg),reps=parseInt(set.reps)
+    if(kg)saveLastWeight(ex.name,kg,set.reps)
+
+    // Auto-start rest timer (only if kg+reps filled)
+    if(kg&&reps&&reps>0){
+      // Find next undone set
+      startTimer(timerPreset,()=>{
+        // Auto-skip to next set when timer's done
+        advanceToNext()
+      })
+    }
+  }
+
+  // Re-render (full render to update card states)
+  renderWorkoutAfterToggle()
+
+  // Check all done
+  const cs=countSets(w.exercises)
+  if(cs.done===cs.total&&cs.total>0){
+    setTimeout(()=>showFinishConfirm(),400)
+  }
+}
+
+function renderWorkoutAfterToggle(){
+  const w=state.currentWorkout
+  if(!w)return
+  const exs=w.exercises
+
+  // Recalculate current idx based on first undone
+  const fu=firstUndone(exs)
+  if(fu)state.currentExIdx=fu.exIdx
+
+  // Update progress
+  const cs=countSets(exs)
+  document.getElementById('workoutSetsSpan').textContent=`${cs.done}/${cs.total} 組`
+  const pct=cs.total>0?Math.round(cs.done/cs.total*100):0
+  document.getElementById('progressLabel').textContent=cs.done===cs.total?'🎉 全部完成！':`${pct}% 完成`
+  document.getElementById('progressBar').style.width=pct+'%'
+
+  // Re-render just the set check buttons and card states — faster than full rebuild
+  document.querySelectorAll('.exercise-card').forEach((card,ei)=>{
+    const ex=exs[ei]
+    if(!ex)return
+
+    // Card highlight
+    card.classList.toggle('current',ei===state.currentExIdx)
+
+    // All done badge
+    const allDone=ex.sets&&ex.sets.length&&ex.sets.every(s=>s.done)
+    const headerActions=card.querySelector('.exercise-header .icon-btn')
+    const badge=card.querySelector('.ex-complete-badge')
+    if(allDone){
+      if(!badge){
+        const div=card.querySelector('.exercise-header>div:last-child')||card.querySelector('.exercise-header>div')
+        if(div){
+          // Remove edit btn, add badge
+          if(headerActions)headerActions.remove()
+          const h=card.querySelector('.exercise-header')
+          const b=document.createElement('div')
+          b.className='ex-complete-badge'
+          b.textContent='✓ 完成'
+          // Actually just re-render fully for simplicity
+        }
+      }
+    }else{
+      if(badge)badge.remove()
+    }
+
+    // Update each set row
+    const rows=card.querySelectorAll('.set-row')
+    rows.forEach((row,si)=>{
+      const set=ex.sets[si]
+      if(!set)return
+      const isCurrent=fu&&fu.exIdx===ei&&fu.setIdx===si
+      row.classList.toggle('done',set.done)
+
+      const inputs=row.querySelectorAll('input')
+      if(inputs[0]){inputs[0].value=set.kg||'';inputs[0].disabled=set.done}
+      if(inputs[1]){inputs[1].value=set.reps||'';inputs[1].disabled=set.done}
+
+      const btn=row.querySelector('.btn-check-set')
+      if(btn){
+        btn.classList.toggle('done',set.done)
+        btn.classList.toggle('current',isCurrent)
+        btn.textContent=set.done?'✓':''
+      }
+    })
+  })
+
+  // Update dots
+  renderDots()
+  updateSwipe()
+}
+
+function advanceToNext(){
+  const w=state.currentWorkout
+  if(!w)return
+  const fu=firstUndone(w.exercises)
+  if(fu){
+    state.currentExIdx=fu.exIdx
+    updateSwipe()
+    renderDots()
+    // Focus the kg input of the next set
+    setTimeout(()=>{
+      const card=document.querySelectorAll('.exercise-card')[fu.exIdx]
+      if(card){
+        const inputs=card.querySelectorAll('.set-row:not(.done) input')
+        if(inputs.length>0)inputs[0].focus()
+      }
+    },300)
+  }
+}
+
+function addSet(ei){
+  if(!state.currentWorkout)return
+  const ex=state.currentWorkout.exercises[ei]
+  if(!ex)return
+  if(!ex.sets)ex.sets=[]
+  // Prefill from last weight
+  const last=getLastWeight(ex.name)
+  ex.sets.push({kg:last.kg||'',reps:last.reps||'',done:false})
+  renderWorkout()
+  toast('新增一組')
+}
+
+function showEditSets(ei){
+  if(!state.currentWorkout)return
+  const ex=state.currentWorkout.exercises[ei]
+  if(!ex)return
+  document.getElementById('editSetsExerciseName').textContent=ex.name
+  const c=document.getElementById('editSetsContainer')
+  c.innerHTML=(ex.sets||[]).map((s,si)=>`
+    <div class="set-row" style="grid-template-columns:1fr 1fr 1fr auto">
+      <div class="form-group"><label>組${si+1}</label><input type="number" inputmode="decimal" step="0.5" min="0" value="${s.kg||''}" onchange="state.currentWorkout.exercises[${ei}].sets[${si}].kg=this.value"></div>
+      <div class="form-group"><label>次數</label><input type="number" inputmode="numeric" step="1" min="0" value="${s.reps||''}" onchange="state.currentWorkout.exercises[${ei}].sets[${si}].reps=this.value"></div>
+      <div class="form-group"><label>✓</label><input type="checkbox" ${s.done?'checked':''} onchange="state.currentWorkout.exercises[${ei}].sets[${si}].done=this.checked"></div>
+      <button style="margin-top:20px;padding:4px 8px;border-radius:12px;background:var(--danger);color:#fff;font-size:12px" onclick="state.currentWorkout.exercises[${ei}].sets.splice(${si},1);showEditSets(${ei});renderWorkout()">✕</button>
+    </div>
+  `).join('')+`<button class="btn-secondary" onclick="state.currentWorkout.exercises[${ei}].sets.push({kg:'',reps:'',done:false});showEditSets(${ei});renderWorkout()">＋ 新增組</button>`
+  showModal('editSetsModal')
+}
+
+// ================================================================
+// START WORKOUT
+// ================================================================
+function startEmpty(){
+  state.currentWorkout={name:'⚡ 自由訓練',startedAt:new Date().toISOString(),exercises:[]}
+  renderWorkout()
+}
+function startTemplateWorkout(idx){
+  const t=state.templates[idx]
+  if(!t)return
+  const ex=t.exercises.map(e=>{
+    const sets=(e.sets&&e.sets.length)?JSON.parse(JSON.stringify(e.sets)):[{kg:'',reps:'',done:false}]
+    // Prefill weights from last session
+    const last=getLastWeight(e.name)
+    if(last.kg||last.reps){
+      sets.forEach(s=>{
+        if(!s.kg&&last.kg)s.kg=last.kg
+        if(!s.reps&&last.reps)s.reps=last.reps
+      })
+    }
+    return{...e,sets}
+  })
+  state.currentWorkout={name:t.name,startedAt:new Date().toISOString(),exercises:ex}
+  renderWorkout()
+  // Switch to workout tab
+  const tb=document.querySelector('.tab-bar button[data-tab="tabWorkout"]')
+  if(tb)switchTab('tabWorkout',tb)
+  // Setup swipe after render
+  setTimeout(setupSwipe,100)
+  toast(`「${t.name}」開始！`)
+}
+
+// ================================================================
+// FINISH WORKOUT
+// ================================================================
+function showFinishConfirm(){
+  if(!state.currentWorkout)return
+  const w=state.currentWorkout
+  const cs=countSets(w.exercises)
+  if(cs.done===0&&!confirm('還沒有完成任何組，確定結束？'))return
+
+  const summary=w.exercises
+    .filter(e=>e.sets&&e.sets.some(s=>s.kg&&s.reps))
+    .map(e=>{
+      const done=(e.sets||[]).filter(s=>s.done&&s.kg&&s.reps)
+      const vol=done.reduce((sum,s)=>sum+parseFloat(s.kg)*parseInt(s.reps),0)
+      const rm=calcEx1RM(e)
+      return `${esc(e.name)}: ${done.length}組 / ${vol.toFixed(0)}kg${rm?` / 1RM:${rm}kg`:''}`
+    }).join('\n')
+
+  document.getElementById('finishSummary').textContent=summary||'(無資料)'
+  showModal('finishConfirmModal')
+}
+
+function finishWorkout(){
+  if(!state.currentWorkout)return
+  closeModal('finishConfirmModal')
+
+  const w=state.currentWorkout
+  const now=new Date()
+  const dateStr=now.toLocaleDateString('zh-TW',{month:'numeric',day:'numeric',weekday:'short'})
+  const timeStr=now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})
+
+  const summary=w.exercises
+    .filter(e=>e.sets&&e.sets.some(s=>s.kg&&s.reps))
+    .map(e=>{
+      const done=(e.sets||[]).filter(s=>s.done&&s.kg&&s.reps)
+      const vol=done.reduce((sum,s)=>sum+parseFloat(s.kg)*parseInt(s.reps),0)
+      const rm=calcEx1RM(e)
+      return `${esc(e.name)}: ${done.length}組 / ${vol.toFixed(0)}kg${rm?` / 1RM:${rm}kg`:''}`
+    }).join('\n')
+
+  state.history.unshift({
+    date:dateStr,time:timeStr,
+    name:w.name||'自由訓練',duration:'',
+    iso:now.toISOString(),
+    summary:summary,
+    exercises:JSON.parse(JSON.stringify(w.exercises))
+  })
+  sv(KEYS.history,state.history)
+  state.currentWorkout=null
+  renderWorkout()
+  renderHistory()
+
+  // Celebration
+  const empty=document.getElementById('workoutEmpty')
+  empty.style.display='block'
+  empty.innerHTML=`<div class="celebration">
+    <div class="big">🎉</div>
+    <h2>訓練完成！</h2>
+    <p>${summary.split('\n').length} 個動作</p>
+  </div>`
+  setTimeout(()=>{
+    empty.innerHTML=`<div class="big-icon">🏋️</div><p>選擇菜單開始訓練</p><p class="sub">或點「⚡ 自由訓練」</p>`
+  },3000)
+
+  if(navigator.vibrate)navigator.vibrate(50)
+  toast('✅ 訓練已儲存')
+}
+
+// ================================================================
+// HISTORY
+// ================================================================
+function renderHistory(){
+  const c=document.getElementById('historyList'),h=state.history
+  if(!h.length){
+    c.innerHTML='<div class="empty-state"><div class="big-icon">📊</div><p>還沒有訓練紀錄</p></div>'
+    return
+  }
+  c.innerHTML=h.map(e=>`
+    <div class="history-item" onclick="this.querySelector('.history-detail').style.display=this.querySelector('.history-detail').style.display==='none'?'block':'none'">
+      <div class="history-date">${esc(e.date)} ${esc(e.time||'')}</div>
+      <div class="history-name">${esc(e.name||'自由訓練')}</div>
+      <div class="history-summary">${e.exercises?e.exercises.filter(x=>x.sets&&x.sets.some(s=>s.kg)).length+' 個動作':''}</div>
+      <div class="history-detail" style="display:none"><pre style="font-family:inherit;white-space:pre-wrap;font-size:12px;color:var(--text3);margin-top:4px">${esc(e.summary||'')}</pre></div>
+    </div>
+  `).join('')
+}
+
+function clearHistory(){
+  if(!confirm('確定清除所有訓練紀錄？'))return
+  state.history=[]
+  sv(KEYS.history,state.history)
+  renderHistory()
+}
+
+// ================================================================
+// DATA EXPORT/IMPORT
+// ================================================================
+function exportAllData(){
+  const data={exercises:state.exercises,templates:state.templates,history:state.history,lastWeights:state.lastWeights,exportedAt:new Date().toISOString()}
+  const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'})
+  const u=URL.createObjectURL(b)
+  const a=document.createElement('a');a.href=u
+  a.download=`gymtracker_${new Date().toISOString().slice(0,10)}.json`
+  a.click();URL.revokeObjectURL(u)
+}
+function importAllData(event){
+  const file=event.target.files[0]
+  if(!file)return
+  const r=new FileReader()
+  r.onload=function(e){
+    try{
+      const data=JSON.parse(e.target.result)
+      if(data.exercises){state.exercises=data.exercises;sv(KEYS.exercises,state.exercises)}
+      if(data.templates){state.templates=data.templates;sv(KEYS.templates,state.templates)}
+      if(data.history){state.history=data.history;sv(KEYS.history,state.history)}
+      if(data.lastWeights){state.lastWeights=data.lastWeights;sv(KEYS.lastWeights,state.lastWeights)}
+      toast('✅ 匯入成功！')
+      renderExercises();renderTemplates();renderHistory()
+    }catch(err){toast('❌ 匯入失敗，格式不正確')}
+  }
+  r.readAsText(file)
+  event.target.value=''
+}
+
+// ================================================================
+// UTILITY
+// ================================================================
+function esc(s){
+  if(s==null)return''
+  const d=document.createElement('div');d.textContent=String(s);return d.innerHTML
+}
+
+// ================================================================
+// INIT
+// ================================================================
+function init(){
+  state.exercises.forEach((ex,i)=>{if(!ex.id)ex.id='ex_'+Date.now()+'_'+i})
+  if(!state.lastWeights||!Object.keys(state.lastWeights).length)state.lastWeights={}
+  sv(KEYS.exercises,state.exercises)
+  renderWorkout()
+  renderExercises()
+  renderTemplates()
+  renderHistory()
+}
+init()
+</script>
+</body>
+</html>
