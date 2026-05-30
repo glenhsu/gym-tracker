@@ -1,1184 +1,1200 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-TW" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, height=device-height">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#1a1a2e">
-<title>🏋️ GymTracker</title>
+<title>重訓日記 💪 v6</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0f0f1a;--surface:#1a1a2e;--surface2:#222240;--surface3:#2a2a4a;
-  --primary:#6c63ff;--primary-light:#8b83ff;--accent:#00d4aa;
-  --danger:#ff4757;--warning:#ffa502;
-  --text:#e8e8f0;--text2:#a0a0b8;--text3:#6a6a82;--border:#2e2e50;
-  --radius:12px;--radius-sm:8px;--radius-xs:6px;
-  --shadow:0 4px 20px rgba(0,0,0,0.3);
-  --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)
-}
-html,body{height:100%;overflow:hidden}
-body{
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans TC','PingFang TC',sans-serif;
-  background:var(--bg);color:var(--text);font-size:15px;line-height:1.5;
-  -webkit-tap-highlight-color:transparent;user-select:none
-}
-button,input,select,textarea{font-family:inherit;font-size:inherit;outline:none;border:none}
-button{cursor:pointer;-webkit-tap-highlight-color:transparent}
-input,select{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:var(--radius-xs);padding:10px 12px;width:100%}
-select{appearance:none;-webkit-appearance:none}
-input:focus{outline:2px solid var(--primary);outline-offset:-2px}
-::-webkit-scrollbar{width:3px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-.app-container{height:100vh;height:100dvh;display:flex;flex-direction:column;padding-top:calc(10px + var(--safe-top))}
-.app-header{padding:8px 16px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.app-header h1{font-size:18px;font-weight:700}
-.app-header h1 span{color:var(--primary)}
-.header-actions{display:flex;gap:6px}
-.icon-btn{width:36px;height:36px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:17px;transition:background .15s}
-.icon-btn:active{background:var(--surface3)}
+  :root {
+    --bg: #09090b; --card: #18181b; --card2: #27272a;
+    --accent: #22c55e; --accent2: #166534;
+    --blue: #3b82f6; --blue2: #1d4ed8;
+    --amber: #f59e0b; --amber2: #92400e;
+    --purple: #a855f7; --purple2: #581c87;
+    --text: #f4f4f5; --text2: #a1a1aa; --text3: #71717a;
+    --border: #3f3f46; --danger: #ef4444;
+    --timer-w: 300px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); overflow:hidden; }
+  .app { display:flex; width:100vw; overflow:hidden; }
 
-/* TABS */
-.tab-bar{display:flex;padding:0 12px;gap:4px;flex-shrink:0;margin-bottom:6px}
-.tab-bar button{flex:1;padding:8px 6px;background:transparent;color:var(--text2);font-size:12px;font-weight:600;border-radius:var(--radius-sm) var(--radius-sm) 0 0;border-bottom:2px solid transparent;transition:all .2s}
-.tab-bar button.active{color:var(--primary);border-bottom-color:var(--primary);background:rgba(108,99,255,0.05)}
+  /* ===== Left Nav ===== */
+  .navbar { width:70px; min-width:70px; background:rgba(24,24,27,0.6); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border-right:1px solid var(--border); display:flex; flex-direction:column; z-index:10; }
+  .navbar .brand { padding:12px 4px 6px; text-align:center; border-bottom:1px solid var(--border); flex-shrink:0; font-size:14px; font-weight:800; color:var(--accent); }
+  .nav-items { flex:1; display:flex; flex-direction:column; padding:6px 0; }
+  .nav-item { display:flex; flex-direction:column; align-items:center; padding:10px 4px; margin:2px 8px; border-radius:12px; cursor:pointer; transition:all 0.2s; color:var(--text3); font-size:18px; }
+  .nav-item span.nav-label { font-size:9px; font-weight:600; margin-top:3px; text-transform:uppercase; letter-spacing:0.5px; }
+  .nav-item.active { background:rgba(59,130,246,0.12); color:var(--blue); }
+  .nav-item:active { transform:scale(0.92); }
 
-/* PAGES */
-.page{flex:1;overflow-y:auto;padding:0 12px calc(80px + var(--safe-bottom));display:none;-webkit-overflow-scrolling:touch}
-.page.active{display:block}
+  /* ===== Main Area ===== */
+  .main { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
+  .page { display:none; flex:1; flex-direction:column; overflow:hidden; min-height:0; }
+  .page.active { display:flex; }
 
-/* PROGRESS BAR */
-.progress-wrap{background:var(--surface2);border-radius:20px;height:6px;margin:0 0 8px;overflow:hidden}
-.progress-bar{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:20px;transition:width .3s ease}
-.progress-label{font-size:11px;color:var(--text3);text-align:center;margin-bottom:4px}
+  /* ===== Template Page ===== */
+  .page-header { padding:12px 16px 8px; border-bottom:1px solid var(--border); flex-shrink:0; }
+  .page-header h2 { font-size:20px; font-weight:800; }
+  .page-header .sub { font-size:12px; color:var(--text2); margin-top:2px; }
+  .page-body { flex:1; overflow-y:auto; padding:10px 14px; -webkit-overflow-scrolling:touch; }
+  .page-body::-webkit-scrollbar { width:4px; }
+  .page-body::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
 
-/* REST TIMER OVERLAY */
-.timer-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:1000;background:rgba(0,0,0,0.85);justify-content:center;align-items:center;flex-direction:column;gap:16px;backdrop-filter:blur(8px)}
-.timer-overlay.show{display:flex}
-.timer-display{font-size:64px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:3px;color:var(--primary);transition:color .3s}
-.timer-display.warning{color:var(--warning)}
-.timer-display.danger{color:var(--danger)}
-.timer-label{font-size:13px;color:var(--text2);margin-top:-6px}
-.timer-controls{display:flex;gap:12px;margin-top:8px}
-.timer-controls button{padding:12px 28px;border-radius:50px;font-size:15px;font-weight:700;transition:transform .1s}
-.timer-controls button:active{transform:scale(0.95)}
-.btn-timer-stop{background:var(--danger);color:#fff}
-.btn-timer-skip{background:var(--surface2);color:var(--text2)}
-.timer-presets{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
-.timer-presets button{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;background:var(--surface2);color:var(--text2);border:1px solid var(--border);transition:all .15s}
-.timer-presets button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .tpl-grid { display:flex; flex-direction:column; gap:10px; }
 
-/* WORKOUT PAGE */
-.workout-select-menu{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
-.workout-select-menu button{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;background:var(--surface2);color:var(--text2);border:1px solid var(--border);transition:all .15s}
-.workout-select-menu button:active{transform:scale(0.95)}
-.workout-select-menu button.btn-start{background:var(--accent);color:#000;border-color:var(--accent)}
-.workout-status{font-size:13px;color:var(--text2);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+  .tpl-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px; cursor:pointer; transition:all 0.2s; }
+  .tpl-card:active { transform:scale(0.98); }
+  .tpl-card:hover { border-color:rgba(59,130,246,0.3); }
+  .tpl-card .tpl-name { font-size:16px; font-weight:700; color:var(--text); }
+  .tpl-card .tpl-meta { font-size:11px; color:var(--text3); margin-top:4px; display:flex; gap:12px; }
+  .tpl-card .tpl-meta span { display:flex; align-items:center; gap:3px; }
+  .tpl-card .tpl-ex-preview { font-size:12px; color:var(--text2); margin-top:8px; display:flex; flex-wrap:wrap; gap:4px; }
+  .tpl-card .tpl-ex-preview .tag { background:var(--bg); padding:2px 8px; border-radius:6px; color:var(--blue); }
+  .tpl-card .tpl-actions { display:flex; gap:6px; margin-top:10px; }
 
-/* SWIPE CONTAINER */
-.swipe-container{position:relative;overflow:hidden;touch-action:pan-y}
-.exercise-cards-wrap{display:flex;transition:transform .3s ease;will-change:transform}
-.exercise-cards-wrap.swiping{transition:none}
+  .empty-state { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text3); gap:10px; }
+  .empty-state i { font-size:40px; opacity:0.25; }
+  .empty-state p { font-size:14px; max-width:260px; text-align:center; }
 
-/* EXERCISE CARD (FULL WIDTH) */
-.exercise-card{min-width:100%;background:var(--surface);border-radius:var(--radius);padding:14px;border:1px solid var(--border)}
-.exercise-card.current{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary)}
-.exercise-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.exercise-name{font-size:17px;font-weight:700}
-.exercise-1rm{font-size:11px;color:var(--accent);font-weight:600;margin-top:1px}
-.ex-complete-badge{font-size:11px;color:var(--accent);background:rgba(0,212,170,0.12);padding:2px 10px;border-radius:10px;font-weight:600}
+  .btn-primary { background:var(--blue); border:none; color:#fff; border-radius:999px; padding:10px 20px; font-size:14px; font-weight:700; cursor:pointer; transition:all 0.15s; display:inline-flex; align-items:center; gap:6px; }
+  .btn-primary:active { transform:scale(0.96); }
+  .btn-secondary { background:var(--card2); border:1px solid var(--border); border:none; color:var(--text2); border-radius:12px; padding:8px 14px; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.15s; display:inline-flex; align-items:center; gap:5px; }
+  .btn-secondary:hover { background:var(--card2); color:var(--text); border-color:var(--text3); }
+  .btn-danger { background:rgba(239,68,68,0.12); border:none; color:var(--danger); border-radius:12px; padding:8px 14px; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.15s; display:inline-flex; align-items:center; gap:5px; }
+  .btn-start { background:var(--accent); border:none; color:#fff; border-radius:12px; padding:8px 14px; font-size:12px; font-weight:700; cursor:pointer; transition:all 0.15s; display:inline-flex; align-items:center; gap:5px; }
+  .btn-start:active { transform:scale(0.96); }
 
-/* DOTS NAV */
-.dots-nav{display:flex;justify-content:center;gap:6px;padding:6px 0 10px}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:all .2s}
-.dot.active{background:var(--primary);width:20px;border-radius:4px}
-.dot.done{background:var(--accent)}
+  /* ===== Workout (Session) Page ===== */
+  .ws-header { padding:12px 16px 8px; border-bottom:1px solid var(--border); flex-shrink:0; }
+  .ws-header .ws-title { font-size:20px; font-weight:800; }
+  .ws-header .ws-meta { font-size:12px; color:var(--text2); margin-top:4px; display:flex; gap:16px; flex-wrap:wrap; }
+  .ws-header .ws-meta i { margin-right:3px; }
+  .ws-header .ws-timer { font-size:13px; color:var(--amber); font-weight:700; font-family:monospace; }
+  .ws-body { flex:1; overflow-y:auto; padding:10px 14px; display:flex; flex-direction:column; gap:8px; -webkit-overflow-scrolling:touch; min-height:0; }
+  .ws-body::-webkit-scrollbar { width:4px; }
+  .ws-body::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
 
-/* SET ROW — 大按鈕風格 */
-.set-row{
-  display:grid;
-  grid-template-columns:28px 1fr 48px 44px;
-  gap:6px;
-  align-items:center;
-  padding:8px 0;
-  border-bottom:1px solid var(--border);
-}
-.set-row:last-child{border-bottom:none}
-.set-row.done{opacity:0.5}
-.set-num{font-size:12px;font-weight:600;color:var(--text3);text-align:center}
-.set-row input{padding:8px 6px;text-align:center;font-size:15px;font-weight:700;border-radius:var(--radius-sm);height:42px}
-.set-row input:disabled{opacity:0.4}
+  .ws-bottom { flex-shrink:0; padding:8px 14px 14px; display:flex; gap:6px; background:var(--bg); border-top:1px solid var(--border); }
 
-/* BIG CHECK BUTTON */
-.btn-check-set{
-  width:44px;height:44px;
-  border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:22px;
-  background:var(--surface2);
-  color:var(--text3);
-  border:2px solid var(--border);
-  transition:all .15s;
-  cursor:pointer;
-}
-.btn-check-set:active{transform:scale(0.9)}
-.btn-check-set.done{
-  background:var(--accent);
-  color:#000;
-  border-color:var(--accent);
-}
-.btn-check-set.current{
-  background:var(--primary);
-  color:#fff;
-  border-color:var(--primary);
-}
+  .ex-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:12px 14px; }
+  .ex-card.done { border-color:rgba(34,197,94,0.3); background:rgba(34,197,94,0.03); }
+  .ex-card .ex-hdr { display:flex; align-items:center; gap:6px; margin-bottom:8px; }
+  .ex-card .ex-hdr .ex-name { font-size:15px; font-weight:700; flex:1; }
+  .ex-card .ex-hdr .ex-done-badge { font-size:10px; color:var(--accent); font-weight:700; }
+  .ex-card .ex-hdr .ex-rm-badge { font-size:11px; color:var(--purple); font-weight:700; font-family:monospace; }
+  .ex-card .ex-hdr .ex-actions { display:flex; gap:2px; }
+  .ex-card .ex-hdr .ex-actions button { background:none; border:none; cursor:pointer; font-size:13px; width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; transition:all 0.15s; }
 
-/* ADD SET BUTTON */
-.btn-add-set{
-  width:100%;
-  padding:10px;
-  margin-top:6px;
-  background:var(--surface2);
-  color:var(--text2);
-  border-radius:var(--radius-sm);
-  font-size:14px;
-  font-weight:600;
-  border:1px dashed var(--border);
-  transition:all .15s;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:4px;
-}
-.btn-add-set:active{background:var(--surface3);color:var(--primary)}
+  .set-list { display:flex; flex-direction:column; gap:4px; margin-bottom:8px; }
+  .set-row { display:flex; align-items:center; gap:6px; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:6px 10px; cursor:pointer; transition:all 0.15s; }
+  .set-row:hover { border-color:var(--blue); background:rgba(59,130,246,0.05); }
+  .set-row:active { transform:scale(0.98); }
+  .set-row.done { border-color:rgba(34,197,94,0.3); background:rgba(34,197,94,0.04); }
+  .set-row .set-chk { width:22px; height:22px; border-radius:50%; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.15s; cursor:pointer; color:transparent; font-size:12px; }
+  .set-row .set-chk.checked { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .set-row .set-num { font-size:11px; font-weight:700; color:var(--text3); min-width:20px; font-family:monospace; }
+  .set-row .set-detail { flex:1; font-size:13px; color:var(--text); font-weight:600; display:flex; align-items:center; gap:6px; }
+  .set-row .set-detail .sn { color:var(--blue); }
+  .set-row .set-detail .sw { color:var(--accent); }
+  .set-row .set-detail .set-edit-input { background:transparent; border:none; color:var(--text); font-size:13px; font-weight:700; font-family:monospace; padding:2px 4px; margin:-2px 0; border-radius:4px; width:40px; text-align:center; outline:none; transition:all 0.15s; }
+  .set-row .set-detail .set-edit-input:focus { background:var(--card2); border:1px solid var(--blue); width:50px; }
+  .set-row .set-del { background:none; border:none; color:var(--text3); font-size:11px; cursor:pointer; width:22px; height:22px; border-radius:6px; display:flex; align-items:center; justify-content:center; opacity:0.4; transition:all 0.15s; }
+  .set-row .set-del:hover { opacity:1; color:var(--danger); background:rgba(239,68,68,0.1); }
 
-/* FINISH BUTTON (floating) */
-.finish-bar{
-  position:sticky;
-  bottom:0;
-  background:var(--bg);
-  padding:10px 0 calc(10px + var(--safe-bottom));
-  border-top:1px solid var(--border);
-  margin-top:auto;
-}
-.btn-finish{
-  width:100%;
-  padding:14px;
-  border-radius:var(--radius);
-  background:linear-gradient(135deg,var(--accent),#00e6b8);
-  color:#000;
-  font-size:17px;
-  font-weight:800;
-  transition:transform .1s;
-  box-shadow:0 4px 20px rgba(0,212,170,0.3);
-}
-.btn-finish:active{transform:scale(0.97)}
+  .add-set-btn { display:flex; align-items:center; justify-content:center; gap:4px; background:var(--bg); border:1px dashed var(--border); border-radius:10px; padding:5px; font-size:11px; color:var(--text3); cursor:pointer; transition:all 0.15s; }
+  .add-set-btn:hover { border-color:var(--blue); color:var(--blue); border-style:solid; }
 
-/* EXERCISES PAGE */
-.exercise-list-item{background:var(--surface);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border)}
-.exercise-list-item .ex-name{font-weight:600;font-size:15px}
-.exercise-list-item .ex-category{font-size:11px;color:var(--text3);margin-top:2px}
-.exercise-list-item .ex-controls{display:flex;gap:6px}
-.exercise-list-item .ex-controls button{padding:4px 10px;border-radius:12px;font-size:11px}
-.btn-edit-ex{background:var(--surface2);color:var(--text2)}
-.btn-del-ex{background:rgba(255,71,87,0.15);color:var(--danger)}
+  /* ===== History Page ===== */
+  .hist-item { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px; margin-bottom:10px; position:relative; }
+  .hist-item:active { transform:scale(0.98); }
+  .hist-del-btn { position:absolute; top:8px; right:8px; width:26px; height:26px; border:none; border-radius:50%; background:rgba(255,60,60,0.15); color:#ff3c3c; font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:2; }
+  .hist-del-btn:hover { background:rgba(255,60,60,0.3); }
+  .hist-date { font-size:14px; font-weight:700; color:var(--text); }
+  .hist-date .hist-dow { font-size:11px; font-weight:400; color:var(--text3); margin-left:6px; }
+  .hist-meta { font-size:11px; color:var(--text3); margin-top:4px; display:flex; gap:14px; flex-wrap:wrap; }
+  .hist-ex-list { margin-top:8px; display:flex; flex-wrap:wrap; gap:4px; }
+  .hist-ex-tag { background:var(--bg); padding:3px 10px; border-radius:6px; font-size:12px; color:var(--text2); }
+  .hist-ex-tag .hrm { color:var(--purple); font-weight:600; font-family:monospace; }
 
-/* TEMPLATES PAGE */
-.template-card{background:var(--surface);border-radius:var(--radius);padding:14px;margin-bottom:10px;border:1px solid var(--border)}
-.template-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-.template-name{font-size:16px;font-weight:700}
-.template-ex-count{font-size:11px;color:var(--text3)}
-.template-actions{display:flex;gap:6px}
-.template-actions button{padding:4px 10px;border-radius:12px;font-size:11px;background:var(--surface2);color:var(--text2)}
-.btn-start-tpl{background:var(--accent)!important;color:#000!important;font-weight:700}
-.template-exercises{display:flex;flex-wrap:wrap;gap:4px}
-.template-exercises span{font-size:11px;padding:3px 10px;background:var(--surface2);border-radius:12px;color:var(--text2)}
+  /* ===== PR Leaderboard ===== */
+  .pr-list { }
+  .pr-item { display:flex; align-items:center; background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px; margin-bottom:8px; gap:12px; }
+  .pr-item .rank { font-size:20px; font-weight:800; color:var(--text3); min-width:30px; text-align:center; }
+  .pr-item .rank.gold { color:#fbbf24; }
+  .pr-item .rank.silver { color:#94a3b8; }
+  .pr-item .rank.bronze { color:#d97706; }
+  .pr-item .pr-info { flex:1; }
+  .pr-item .pr-name { font-size:15px; font-weight:700; }
+  .pr-item .pr-detail { line-height:1.6; }
+  .pr-item .pr-detail .pr-record { font-size:15px; font-weight:700; color:var(--text); }
+  .pr-item .pr-detail .pr-record .pr-record-unit { font-size:11px; color:var(--text3); font-weight:400; }
+  .pr-item .pr-detail .pr-date { font-size:12px; color:var(--text3); }
+  .pr-item .pr-rm { font-size:22px; font-weight:800; color:var(--purple); font-family:monospace; }
+  .pr-item .pr-rm .rm-unit { font-size:12px; color:var(--text3); }
 
-/* MODAL */
-.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:500;background:rgba(0,0,0,0.7);justify-content:flex-end;align-items:flex-end}
-.modal-overlay.show{display:flex}
-.modal-sheet{width:100%;max-height:92vh;background:var(--surface);border-radius:var(--radius) var(--radius) 0 0;padding:16px 20px calc(20px + var(--safe-bottom));overflow-y:auto;animation:slideUp .25s ease-out}
-.modal-title{font-size:18px;font-weight:700;margin-bottom:4px;text-align:center}
-.modal-subtitle{font-size:13px;color:var(--text3);text-align:center;margin-bottom:16px}
-.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 12px}
-.form-group{margin-bottom:12px}
-.form-group label{display:block;font-size:13px;font-weight:600;color:var(--text2);margin-bottom:4px}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.btn-primary{width:100%;padding:14px;border-radius:var(--radius-sm);background:var(--primary);color:#fff;font-size:16px;font-weight:700;transition:transform .1s}
-.btn-primary:active{transform:scale(0.98)}
-.btn-secondary{width:100%;padding:12px;border-radius:var(--radius-sm);background:var(--surface2);color:var(--text2);font-size:14px;font-weight:600;margin-top:8px}
+  /* ===== Settings Page ===== */
+  .settings-section { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; margin-bottom:12px; }
+  .settings-section h4 { margin:0 0 10px; font-size:15px; color:var(--text); }
+  .settings-section label { font-size:11px; color:var(--text2); text-transform:uppercase; letter-spacing:1px; display:block; margin:8px 0 4px; }
+  .settings-rest-input { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:12px 14px; color:var(--text); font-size:20px; font-weight:700; font-family:monospace; text-align:center; outline:none; }
+  .settings-rest-input:focus { border-color:var(--blue); }
+  .settings-rest-input-desc { font-size:12px; color:var(--text3); margin-top:4px; }
+  .btn-reset-data { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:var(--danger); border-radius:12px; padding:14px; font-size:14px; font-weight:700; cursor:pointer; transition:all 0.15s; display:flex; align-items:center; justify-content:center; gap:8px; width:100%; }
+  .btn-reset-data:active { transform:scale(0.96); }
 
-/* HISTORY */
-.history-item{background:var(--surface);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px;border:1px solid var(--border)}
-.history-date{font-size:13px;font-weight:600;color:var(--primary);margin-bottom:4px}
-.history-name{font-size:15px;font-weight:700}
-.history-summary{font-size:11px;color:var(--text2);margin-top:2px}
-.history-detail{margin-top:8px;padding-top:6px;border-top:1px solid var(--border);font-size:12px;color:var(--text3)}
+  /* ===== Modals ===== */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); z-index:90; justify-content:center; align-items:center; }
+  .modal-overlay.show { display:flex; }
+  .modal-box { background:var(--card); border:1px solid var(--border); border-radius:24px; padding:24px; width:420px; max-width:90vw; max-height:80vh; overflow-y:auto; }
+  .modal-box h3 { font-size:18px; font-weight:700; margin-bottom:16px; }
+  .modal-box label { font-size:11px; color:var(--text2); text-transform:uppercase; letter-spacing:1px; display:block; margin-top:12px; margin-bottom:4px; }
+  .modal-box input, .modal-box textarea { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px 12px; color:var(--text); font-size:14px; outline:none; }
+  .modal-box input:focus, .modal-box textarea:focus { border-color:var(--blue); }
+  .modal-box textarea { resize:vertical; min-height:60px; font-family:inherit; }
+  .modal-box .modal-actions { display:flex; gap:8px; margin-top:20px; }
+  .modal-box .modal-actions button { flex:1; border:none; border-radius:12px; padding:12px; font-weight:600; font-size:14px; cursor:pointer; }
+  .modal-box .modal-actions .btn-save { background:var(--blue); color:#fff; }
+  .modal-box .modal-actions .btn-cancel { background:var(--card2); color:var(--text2); }
 
-/* EMPTY STATES */
-.empty-state{text-align:center;padding:40px 20px;color:var(--text3)}
-.empty-state .big-icon{font-size:48px;margin-bottom:12px}
-.empty-state p{font-size:14px;margin-bottom:4px}
-.empty-state p.sub{font-size:12px;color:var(--text3)}
+  /* ===== Template Exercise Row ===== */
+  .tpl-ex-row { display:flex; align-items:center; gap:6px; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:6px 8px; margin-bottom:6px; }
+  .tpl-ex-row .ex-fields { flex:1; display:flex; gap:6px; min-width:0; }
+  .tpl-ex-row .ex-fields input { width:0; flex:1; min-width:0; background:transparent; border:none; padding:6px 4px; color:var(--text); font-size:13px; outline:none; font-weight:600; }
+  .tpl-ex-row .ex-fields input::placeholder { color:var(--text3); font-weight:400; }
+  .tpl-ex-row .ex-fields input.num-input { text-align:center; max-width:70px; font-family:monospace; font-weight:700; font-size:13px; }
+  .tpl-ex-row .ex-del { background:none; border:none; color:var(--text3); cursor:pointer; font-size:14px; width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.15s; }
+  .tpl-ex-row .ex-del:hover { color:var(--danger); background:rgba(239,68,68,0.1); }
+  .tpl-ex-add { display:flex; align-items:center; justify-content:center; gap:4px; background:var(--bg); border:1px dashed var(--border); border-radius:10px; padding:8px; font-size:12px; color:var(--text3); cursor:pointer; transition:all 0.15s; margin-top:2px; }
+  .tpl-ex-add:hover { border-color:var(--blue); color:var(--blue); border-style:solid; }
 
-/* CELEBRATION */
-.celebration{
-  text-align:center;padding:30px 20px;
-  animation:fadeIn .3s ease;
-}
-.celebration .big{font-size:60px;margin-bottom:12px}
-.celebration h2{font-size:22px;margin-bottom:6px;color:var(--accent)}
-.celebration p{font-size:13px;color:var(--text2);margin-bottom:4px}
+  .set-edit-inputs { display:flex; gap:8px; margin-top:4px; }
+  .set-edit-inputs div { flex:1; }
+  .set-edit-inputs label { text-align:center; }
+  .set-edit-inputs input { text-align:center; font-size:18px; font-weight:700; padding:12px; }
 
-/* TOAST */
-.toast{
-  position:fixed;bottom:calc(100px + var(--safe-bottom));left:50%;transform:translateX(-50%);
-  background:var(--surface);color:var(--text);padding:10px 20px;border-radius:30px;
-  font-size:13px;font-weight:600;z-index:999;
-  box-shadow:0 4px 20px rgba(0,0,0,0.4);
-  border:1px solid var(--border);
-  opacity:0;transition:opacity .2s;
-  pointer-events:none;
-  white-space:nowrap;
-}
-.toast.show{opacity:1}
+  /* ===== Stats ===== */
+  .stat-row { display:flex; gap:10px; margin-bottom:10px; }
+  .stat-card { flex:1; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px; text-align:center; }
+  .stat-card .stat-val { font-size:22px; font-weight:800; color:var(--text); font-family:monospace; }
+  .stat-card .stat-label { font-size:10px; color:var(--text3); text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
+  .stat-card .stat-val.green { color:var(--accent); }
 
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  /* ===== Toast ===== */
+  .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--card2); color:var(--text); padding:10px 20px; border-radius:12px; font-size:13px; z-index:200; box-shadow:0 4px 24px rgba(0,0,0,0.5); display:none; white-space:nowrap; }
+  .toast.show { display:block; animation:fadeUp 0.3s ease; }
+  @keyframes fadeUp { from{opacity:0;transform:translateX(-50%) translateY(12px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+
+  @media (max-width:680px) {
+    .navbar{width:60px;min-width:60px}
+    .page-body{padding:8px 10px}
+    .ex-card{padding:10px 12px}
+    .modal-box{width:95vw;padding:18px}
+    .tpl-ex-row .ex-fields{flex-wrap:wrap;gap:4px}
+    .tpl-ex-row .ex-fields input.num-input{max-width:55px}
+  }
 </style>
 </head>
 <body>
 
-<div class="timer-overlay" id="timerOverlay">
-  <div class="timer-display" id="timerDisplay">01:00</div>
-  <div class="timer-label">⏱ 休息中</div>
-  <div class="timer-presets" id="timerPresets">
-    <button data-sec="30">30s</button>
-    <button data-sec="60" class="active">60s</button>
-    <button data-sec="90">90s</button>
-    <button data-sec="120">120s</button>
-    <button data-sec="180">180s</button>
-    <button data-sec="300">5min</button>
-  </div>
-  <div class="timer-controls">
-    <button class="btn-timer-stop" onclick="stopTimer()">✕ 關閉</button>
-    <button class="btn-timer-skip" onclick="skipTimer()">⏭ 跳過</button>
-  </div>
-</div>
-
-<div class="app-container">
-  <header class="app-header">
-    <h1><span>🏋️</span> GymTracker</h1>
-    <div class="header-actions">
-      <button class="icon-btn" onclick="exportAllData()" title="匯出備份">📤</button>
-      <button class="icon-btn" onclick="document.getElementById('importInput').click()" title="匯入備份">📥</button>
-      <input type="file" id="importInput" accept=".json" style="display:none" onchange="importAllData(event)">
+<div class="app">
+  <!-- ===== Left Navigation ===== -->
+  <div class="navbar">
+    <div class="brand">💪</div>
+    <div class="nav-items">
+      <div class="nav-item active" data-page="templates"><i class="fas fa-dumbbell"></i><span class="nav-label">範本</span></div>
+      <div class="nav-item" data-page="workout"><i class="fas fa-play-circle"></i><span class="nav-label">訓練</span></div>
+      <div class="nav-item" data-page="history"><i class="fas fa-history"></i><span class="nav-label">紀錄</span></div>
+      <div class="nav-item" data-page="leaderboard"><i class="fas fa-trophy"></i><span class="nav-label">排行</span></div>
+      <div class="nav-item" data-page="settings"><i class="fas fa-cog"></i><span class="nav-label">設定</span></div>
     </div>
-  </header>
+  </div>
 
-  <nav class="tab-bar" id="tabBar">
-    <button class="active" data-tab="tabWorkout" onclick="switchTab('tabWorkout',this)">💪 訓練</button>
-    <button data-tab="tabExercises" onclick="switchTab('tabExercises',this)">🏋️ 動作</button>
-    <button data-tab="tabTemplates" onclick="switchTab('tabTemplates',this)">📋 菜單</button>
-    <button data-tab="tabHistory" onclick="switchTab('tabHistory',this)">📊 紀錄</button>
-  </nav>
-
-  <div class="page active" id="tabWorkout">
-    <div class="workout-select-menu" id="workoutSelectMenu"></div>
-
-    <div class="empty-state" id="workoutEmpty">
-      <div class="big-icon">🏋️</div>
-      <p>選擇菜單開始訓練</p>
-      <p class="sub">或點「⚡ 自由訓練」</p>
+  <div class="main">
+    <!-- ===== Templates Page ===== -->
+    <div class="page active" id="pageTemplates">
+      <div class="page-header">
+        <h2>📋 訓練範本</h2>
+        <div class="sub">點範本可編輯，或按開始訓練</div>
+      </div>
+      <div class="page-body" id="tplList"></div>
     </div>
 
-    <div id="workoutActive" style="display:none">
-      <div class="progress-label" id="progressLabel"></div>
-      <div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
-      <div class="workout-status">
-        <span id="workoutNameSpan"></span>
-        <div style="display:flex;gap:8px;align-items:center">
-          <span id="workoutSetsSpan" style="font-size:11px;color:var(--text3)"></span>
-          <button id="btnFinishSmall" style="padding:4px 12px;border-radius:16px;background:var(--accent);color:#000;font-size:12px;font-weight:700" onclick="showFinishConfirm()">✓ 結束</button>
+    <!-- ===== Workout (Session) Page ===== -->
+    <div class="page" id="pageWorkout">
+      <div class="ws-header">
+        <div class="ws-title" id="wsTitle">🏋️ 訓練中</div>
+        <div class="ws-meta">
+          <span id="wsDate"></span>
+          <span id="wsTimer"><i class="fas fa-clock"></i> <span id="wsElapsed">00:00</span></span>
         </div>
       </div>
-
-      <!-- SWIPE CONTAINER -->
-      <div class="swipe-container" id="swipeContainer">
-        <div class="exercise-cards-wrap" id="exerciseCardsWrap">
-          <!-- rendered by JS -->
-        </div>
+      <div class="ws-bottom" style="padding:6px 14px 10px;border-bottom:1px solid var(--border);border-top:none;">
+        <button class="btn-secondary" id="wsRest" style="flex:1;padding:12px;font-size:14px;border-radius:12px;"><i class="fas fa-stopwatch"></i> 休息</button>
+        <button class="btn-danger" id="wsCancel" style="flex:1;padding:12px;font-size:14px;border-radius:12px;"><i class="fas fa-times"></i> 取消</button>
+        <button class="btn-primary" id="wsFinish" style="flex:1;padding:12px;font-size:14px;font-weight:800;border-radius:12px;"><i class="fas fa-check-circle"></i> 完成</button>
       </div>
-      <div class="dots-nav" id="dotsNav"></div>
+      <div class="ws-body" id="wsBody"></div>
+    </div>
+
+    <!-- ===== History Page ===== -->
+    <div class="page" id="pageHistory">
+      <div class="page-header">
+        <h2>📜 訓練紀錄</h2>
+        <div class="sub" id="histSub">所有訓練歷史</div>
+      </div>
+      <div class="page-body" id="histList"></div>
+    </div>
+
+    <!-- ===== Leaderboard Page ===== -->
+    <div class="page" id="pageLeaderboard">
+      <div class="page-header">
+        <h2>🏆 PR 排行榜</h2>
+        <div class="sub">各項動作的最高 1RM 紀錄</div>
+      </div>
+      <div class="page-body" id="prList"></div>
+    </div>
+
+    <!-- ===== Settings Page ===== -->
+      <div class="page" id="pageSettings">
+        <div class="page-header">
+          <h2>⚙️ 設定</h2>
+          <div class="sub">休息計時設定</div>
+        </div>
+        <div class="page-body" id="settingsBody"></div>
+      </div>
     </div>
   </div>
 
-  <div class="page" id="tabExercises">
-    <div style="margin-bottom:10px"><button class="btn-primary" onclick="showModal('exerciseModal')">＋ 新增動作</button></div>
-    <div id="exerciseList"></div>
-  </div>
-
-  <div class="page" id="tabTemplates">
-    <div style="margin-bottom:10px"><button class="btn-primary" onclick="showModal('templateModal')">＋ 新增菜單</button></div>
-    <div id="templateList"></div>
-  </div>
-
-  <div class="page" id="tabHistory">
-    <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-      <button class="icon-btn" onclick="clearHistory()" style="font-size:12px;padding:8px 14px;border-radius:20px;background:var(--surface2);color:var(--text2)">🗑 清除</button>
+<div class="modal-overlay" id="tplModal">
+  <div class="modal-box">
+    <h3 id="tplModalTitle">📋 新增範本</h3>
+    <label>範本名稱</label>
+    <input type="text" id="tplNameInput" placeholder="e.g. 推日、拉日、腿日">
+    <label>運動項目</label>
+    <div style="display:flex;gap:6px;font-size:11px;color:var(--text3);padding:0 8px 4px;font-weight:600;">
+      <div style="flex:1;min-width:0;">動作名</div>
+      <div style="width:70px;text-align:center;">次數</div>
+      <div style="width:70px;text-align:center;">重量</div>
+      <div style="width:30px;"></div>
     </div>
-    <div id="historyList"></div>
-    <div id="historyCharts" style="margin-top:12px"></div>
+    <div id="tplExList"></div>
+    <div class="tpl-ex-add" id="tplExAdd"><i class="fas fa-plus"></i> 新增運動項目</div>
+    <div class="modal-actions" id="tplModalActions">
+      <button class="btn-cancel" id="tplModalCancel">取消</button>
+      <button class="btn-save" id="tplModalSave">儲存</button>
+    </div>
   </div>
 </div>
 
-<!-- MODALS -->
-<div class="modal-overlay" id="exerciseModal" onclick="closeModalIfOutside(event,'exerciseModal')">
-  <div class="modal-sheet" onclick="event.stopPropagation()">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="exerciseModalTitle">🏋️ 新增動作</div>
-    <div class="form-group">
-      <label>動作名稱</label>
-      <input id="exerciseNameInput" placeholder="e.g. 槓鈴臥推">
+<!-- ===== Rest Timer Modal ===== -->
+<div class="modal-overlay" id="restTimerModal">
+  <div class="modal-box" style="max-width:320px;text-align:center;">
+    <h3>⏱️ 休息計時</h3>
+    <div style="font-size:72px;font-weight:700;font-variant-numeric:tabular-nums;margin:16px 0;color:var(--text);" id="rtDisplay">1:30</div>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn-cancel" id="rtCancel" style="flex:1;border:none;border-radius:12px;padding:14px;font-weight:700;font-size:16px;cursor:pointer;background:var(--card2);color:var(--text2);">✕ 取消</button>
+      <button class="btn-save" id="rtStart" style="flex:1;border:none;border-radius:12px;padding:14px;font-weight:700;font-size:16px;cursor:pointer;background:var(--accent);color:#fff;box-shadow:0 0 15px rgba(34,197,94,0.25);">▶ 開始</button>
     </div>
-    <div class="form-group">
-      <label>分類</label>
-      <select id="exerciseCategoryInput">
-        <option value="chest">胸</option>
-        <option value="back">背</option>
-        <option value="shoulders">肩</option>
-        <option value="legs">腿</option>
-        <option value="arms">手臂</option>
-        <option value="core">核心</option>
-        <option value="fullbody">全身</option>
-        <option value="other" selected>其他</option>
-      </select>
-    </div>
-    <button class="btn-primary" onclick="saveExercise()">確認</button>
-    <button class="btn-secondary" onclick="closeModal('exerciseModal')">取消</button>
   </div>
 </div>
 
-<div class="modal-overlay" id="templateModal" onclick="closeModalIfOutside(event,'templateModal')">
-  <div class="modal-sheet" onclick="event.stopPropagation()">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="templateModalTitle">📋 新增菜單</div>
-    <div class="form-group">
-      <label>菜單名稱</label>
-      <input id="templateNameInput" placeholder="e.g. 推日">
+<!-- ===== Set Edit Modal ===== -->
+<div class="modal-overlay" id="editSetModal">
+  <div class="modal-box">
+    <h3>✏️ 編輯組</h3>
+    <div class="set-edit-inputs">
+      <div><label>次數</label><input type="number" id="editSetReps" min="0" value="10"></div>
+      <div><label>重量 (kg)</label><input type="number" id="editSetWeight" step="0.5" min="0" value="60"></div>
     </div>
-    <div class="form-group">
-      <label>選擇動作</label>
-      <div id="templateExerciseSelector" style="max-height:200px;overflow-y:auto;gap:4px;display:flex;flex-wrap:wrap;"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="editSetCancel">取消</button>
+      <button class="btn-save" id="editSetSave">儲存</button>
     </div>
-    <button class="btn-primary" onclick="saveTemplate()">確認</button>
-    <button class="btn-secondary" onclick="closeModal('templateModal')">取消</button>
   </div>
 </div>
 
-<div class="modal-overlay" id="finishConfirmModal" onclick="closeModalIfOutside(event,'finishConfirmModal')">
-  <div class="modal-sheet" onclick="event.stopPropagation()">
-    <div class="modal-handle"></div>
-    <div class="modal-title">✅ 結束訓練？</div>
-    <div class="modal-subtitle" id="finishSummary"></div>
-    <button class="btn-primary" style="background:var(--accent);color:#000" onclick="finishWorkout()">✅ 儲存並結束</button>
-    <button class="btn-secondary" onclick="closeModal('finishConfirmModal')">繼續訓練</button>
+<!-- ===== Delete Confirm Modal ===== -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-box">
+    <h3 id="confirmTitle">⚠️ 確認</h3>
+    <p id="confirmMsg" style="font-size:14px;color:var(--text2);margin-bottom:16px;"></p>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="confirmCancel">取消</button>
+      <button class="btn-save" id="confirmOk" style="background:var(--danger);">確認刪除</button>
+    </div>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ================================================================
-// DATA LAYER
-// ================================================================
-const KEYS={exercises:'gym_exercises',templates:'gym_templates',history:'gym_history',lastWeights:'gym_last_weights'}
-function ld(k){try{return JSON.parse(localStorage.getItem(k))||[]}catch{return[]}}
-function sv(k,d){localStorage.setItem(k,JSON.stringify(d))}
+(function() {
+'use strict';
 
-let state={
-  exercises: ld(KEYS.exercises),
-  templates: ld(KEYS.templates),
-  history: ld(KEYS.history),
-  lastWeights: ld(KEYS.lastWeights), // {"exName_kg": latestKg, "exName_reps": latestReps}
-  currentWorkout: null,
-  editExId: null,
-  editTplId: null,
-  currentExIdx: 0 // which exercise is showing
-}
+const DB_NAME = 'gym_v5';
 
-// ================================================================
-// TIMER
-// ================================================================
-let timerInt=null,timerRem=60,timerTot=60,timerPreset=60
-let timerCallback=null // called when timer finishes
+/* ===================================================================
+   Database Layer
+   =================================================================== */
 
-function startTimer(sec,cb){
-  if(timerInt){clearInterval(timerInt);timerInt=null}
-  timerTot=timerRem=sec;timerCallback=cb||null
-  updateTimerDisp()
-  document.getElementById('timerOverlay').classList.add('show')
-  runTimer()
-}
-function updateTimerDisp(){
-  const d=document.getElementById('timerDisplay')
-  const m=Math.floor(timerRem/60),s=timerRem%60
-  d.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
-  d.className='timer-display'
-  if(timerRem<=5)d.classList.add('danger')
-  else if(timerRem<=15)d.classList.add('warning')
-}
-function runTimer(){
-  if(timerInt)return
-  updateTimerDisp()
-  timerInt=setInterval(()=>{
-    timerRem--;updateTimerDisp()
-    if(timerRem<=3&&timerRem>0)playBeep(880,80)
-    if(timerRem<=0){
-      clearInterval(timerInt);timerInt=null
-      timerFinished()
+var DB = {
+  _store: null,
+  _autoId: {},
+
+  init: function() {
+    this._store = {};
+    try {
+      var raw = localStorage.getItem('gym_v5_db');
+      if (raw) this._store = JSON.parse(raw);
+    } catch(e) {}
+    ['templates','workouts','pr_records'].forEach(function(t) {
+      if (!DB._store[t]) DB._store[t] = [];
+    });
+    try {
+      var ai = localStorage.getItem('gym_v5_autoId');
+      if (ai) DB._autoId = JSON.parse(ai);
+    } catch(e) {}
+    ['templates','workouts'].forEach(function(t) {
+      if (!DB._autoId[t]) DB._autoId[t] = 1;
+    });
+    this._save();
+  },
+
+  _save: function() {
+    try {
+      localStorage.setItem('gym_v5_db', JSON.stringify(this._store));
+      localStorage.setItem('gym_v5_autoId', JSON.stringify(this._autoId));
+    } catch(e) {
+      console.warn('localStorage full, data may be lost');
     }
-  },1000)
-}
-function stopTimer(){
-  if(timerInt){clearInterval(timerInt);timerInt=null}
-  document.getElementById('timerOverlay').classList.remove('show')
-  timerCallback=null
-}
-function skipTimer(){stopTimer()}
-function timerFinished(){
-  playBeep(440,200);setTimeout(()=>playBeep(660,200),250);setTimeout(()=>playBeep(880,400),500)
-  if(navigator.vibrate)navigator.vibrate([100,100,100,100,300])
-  const cb=timerCallback;timerCallback=null
-  if(typeof cb==='function')setTimeout(cb,200)
-}
+  },
 
-document.addEventListener('click',function(e){
-  const btn=e.target.closest('#timerPresets button')
-  if(!btn)return
-  document.querySelectorAll('#timerPresets button').forEach(b=>b.classList.remove('active'))
-  btn.classList.add('active')
-  timerPreset=parseInt(btn.dataset.sec)
-  if(!timerInt){timerRem=timerTot=timerPreset;updateTimerDisp()}
-})
+  _nextId: function(table) {
+    var id = this._autoId[table]++;
+    this._save();
+    return id;
+  },
 
-function playBeep(freq,dur){
-  try{
-    const ctx=new(window.AudioContext||window.webkitAudioContext)()
-    const osc=ctx.createOscillator();const gain=ctx.createGain()
-    osc.type='sine';osc.frequency.value=freq;gain.gain.value=0.15
-    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur/1000)
-    osc.connect(gain);gain.connect(ctx.destination);osc.start();osc.stop(ctx.currentTime+dur/1000)
-  }catch(e){}
-}
+  all: function(table) {
+    return this._store[table] || [];
+  },
 
-function toast(msg){
-  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show')
-  clearTimeout(t._toast);t._toast=setTimeout(()=>t.classList.remove('show'),2000)
-}
+  get: function(table, key) {
+    var list = this._store[table] || [];
+    return list.find(function(i) { return i.id === key; }) || null;
+  },
 
-// ================================================================
-// 1RM CALC
-// ================================================================
-function estimate1RM(kg,reps){
-  if(!kg||!reps||reps<1)return null
-  if(reps===1)return kg
-  return Math.round(kg*(1+reps/30)*10)/10
-}
-
-// ================================================================
-// TABS
-// ================================================================
-function switchTab(tabId,btn){
-  document.querySelectorAll('.tab-bar button').forEach(b=>b.classList.remove('active'))
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))
-  btn.classList.add('active')
-  document.getElementById(tabId).classList.add('active')
-  if(tabId==='tabWorkout')renderWorkout()
-  if(tabId==='tabExercises')renderExercises()
-  if(tabId==='tabTemplates')renderTemplates()
-  if(tabId==='tabHistory')renderHistory()
-}
-
-// ================================================================
-// MODALS
-// ================================================================
-function showModal(id){document.getElementById(id).classList.add('show')}
-function closeModal(id){document.getElementById(id).classList.remove('show')}
-function closeModalIfOutside(e,id){if(!e.target.closest('.modal-sheet'))closeModal(id)}
-
-// ================================================================
-// EXERCISES CRUD
-// ================================================================
-function renderExercises(){
-  const c=document.getElementById('exerciseList'),ex=state.exercises
-  if(!ex.length){c.innerHTML='<div class="empty-state"><div class="big-icon">🏋️</div><p>還沒有動作</p><p class="sub">點上方新增</p></div>';return}
-  const catNames={chest:'胸',back:'背',shoulders:'肩',legs:'腿',arms:'手臂',core:'核心',fullbody:'全身',other:'其他'}
-  c.innerHTML=ex.map((e,i)=>`
-    <div class="exercise-list-item">
-      <div><div class="ex-name">${esc(e.name)}</div><div class="ex-category">${catNames[e.category]||e.category}</div></div>
-      <div class="ex-controls"><button class="btn-edit-ex" onclick="editExercise(${i})">✏️</button><button class="btn-del-ex" onclick="delEx(${i})">✕</button></div>
-    </div>
-  `).join('')
-}
-function saveExercise(){
-  const name=document.getElementById('exerciseNameInput').value.trim()
-  const cat=document.getElementById('exerciseCategoryInput').value
-  if(!name){toast('請輸入動作名稱');return}
-  if(state.editExId!==null)state.exercises[state.editExId]={name,category}
-  else state.exercises.push({name,category})
-  state.editExId=null
-  sv(KEYS.exercises,state.exercises)
-  document.getElementById('exerciseNameInput').value=''
-  document.getElementById('exerciseCategoryInput').value='other'
-  closeModal('exerciseModal')
-  renderExercises();renderTemplates()
-}
-function editExercise(i){
-  state.editExId=i
-  const e=state.exercises[i]
-  document.getElementById('exerciseModalTitle').textContent='✏️ 編輯動作'
-  document.getElementById('exerciseNameInput').value=e.name
-  document.getElementById('exerciseCategoryInput').value=e.category
-  showModal('exerciseModal')
-}
-function delEx(i){
-  if(!confirm(`確定刪除「${state.exercises[i].name}」？`))return
-  state.exercises.splice(i,1)
-  sv(KEYS.exercises,state.exercises)
-  renderExercises();renderTemplates()
-}
-document.addEventListener('click',function(e){
-  const b=e.target.closest('#tabExercises .btn-primary')
-  if(b&&b.textContent.includes('新增動作')){
-    state.editExId=null
-    document.getElementById('exerciseModalTitle').textContent='🏋️ 新增動作'
-    document.getElementById('exerciseNameInput').value=''
-    document.getElementById('exerciseCategoryInput').value='other'
-  }
-})
-
-// ================================================================
-// TEMPLATES CRUD
-// ================================================================
-function renderTemplates(){
-  const c=document.getElementById('templateList'),tpls=state.templates
-  if(!tpls.length){c.innerHTML='<div class="empty-state"><div class="big-icon">📋</div><p>還沒有菜單</p><p class="sub">點上方新增</p></div>';return}
-  c.innerHTML=tpls.map((t,i)=>`
-    <div class="template-card">
-      <div class="template-header">
-        <div><div class="template-name">${esc(t.name)}</div><div class="template-ex-count">${t.exercises.length} 個動作</div></div>
-        <div class="template-actions">
-          <button class="btn-start-tpl" onclick="startTemplateWorkout(${i})">▶ 開始</button>
-          <button onclick="editTemplate(${i})">✏️</button>
-          <button onclick="delTpl(${i})">✕</button>
-        </div>
-      </div>
-      <div class="template-exercises">${t.exercises.map(e=>`<span>${esc(e.name)}</span>`).join('')}</div>
-    </div>
-  `).join('')
-}
-function saveTemplate(){
-  const name=document.getElementById('templateNameInput').value.trim()
-  const checked=document.querySelectorAll('#templateExerciseSelector input:checked')
-  const selected=Array.from(checked).map(c=>c.value)
-  if(!name){toast('請輸入菜單名稱');return}
-  if(!selected.length){toast('請選擇至少一個動作');return}
-  const exercises=selected.map(id=>{
-    const ex=state.exercises.find(e=>e.id===id)
-    return ex?{name:ex.name,category:ex.category,sets:[{kg:'',reps:'',done:false}]}:null
-  }).filter(Boolean)
-  const tpl={name,exercises}
-  if(state.editTplId!==null)state.templates[state.editTplId]=tpl
-  else state.templates.push(tpl)
-  state.editTplId=null
-  sv(KEYS.templates,state.templates)
-  closeModal('templateModal')
-  renderTemplates()
-}
-function editTemplate(i){
-  state.editTplId=i;const t=state.templates[i]
-  document.getElementById('templateModalTitle').textContent='✏️ 編輯菜單'
-  document.getElementById('templateNameInput').value=t.name
-  renderTemplateSelector()
-  t.exercises.forEach(e=>{
-    const found=state.exercises.find(x=>x.name===e.name)
-    if(found){const cb=document.querySelector(`#templateExerciseSelector input[value="${found.id}"]`);if(cb)cb.checked=true}
-  })
-  showModal('templateModal')
-}
-function delTpl(i){
-  if(!confirm(`確定刪除「${state.templates[i].name}」？`))return
-  state.templates.splice(i,1)
-  sv(KEYS.templates,state.templates)
-  renderTemplates()
-}
-document.addEventListener('click',function(e){
-  const b=e.target.closest('#tabTemplates .btn-primary')
-  if(b&&b.textContent.includes('新增菜單')){
-    state.editTplId=null
-    document.getElementById('templateModalTitle').textContent='📋 新增菜單'
-    document.getElementById('templateNameInput').value=''
-    renderTemplateSelector()
-  }
-})
-function renderTemplateSelector(){
-  const c=document.getElementById('templateExerciseSelector'),ex=state.exercises
-  if(!ex.length){c.innerHTML='<span style="color:var(--text3);font-size:13px;">請先新增動作</span>';return}
-  ex.forEach((e,i)=>{if(!e.id)e.id='ex_'+Date.now()+'_'+i})
-  sv(KEYS.exercises,ex)
-  c.innerHTML=ex.map(e=>`<label style="display:flex;align-items:center;gap:4px;padding:4px 8px;background:var(--surface2);border-radius:16px;font-size:13px;cursor:pointer"><input type="checkbox" value="${e.id}">${esc(e.name)}</label>`).join('')
-}
-
-// ================================================================
-// WORKOUT - CORE
-// ================================================================
-/** Get the last recorded weight/reps for an exercise */
-function getLastWeight(exName){
-  const w=state.lastWeights
-  return{kg:w?.[exName+'_kg']||'',reps:w?.[exName+'_reps']||''}
-}
-function saveLastWeight(exName,kg,reps){
-  state.lastWeights[exName+'_kg']=kg
-  state.lastWeights[exName+'_reps']=reps
-  sv(KEYS.lastWeights,state.lastWeights)
-}
-
-/** Count total/done sets */
-function countSets(exercises){
-  let total=0,done=0
-  exercises.forEach(e=>{(e.sets||[]).forEach(s=>{total++;if(s.done)done++})})
-  return{total,done}
-}
-
-/** Find first undone set position */
-function firstUndone(exercises){
-  for(let i=0;i<exercises.length;i++){
-    if(!exercises[i].sets)continue
-    for(let j=0;j<exercises[i].sets.length;j++){
-      if(!exercises[i].sets[j].done)return{exIdx:i,setIdx:j}
+  put: function(table, data) {
+    var list = this._store[table] || [];
+    if (data.id === undefined || data.id === null) {
+      data.id = this._nextId(table);
+      list.push(data);
+    } else {
+      var idx = list.findIndex(function(i) { return i.id === data.id; });
+      if (idx >= 0) list[idx] = data;
+      else list.push(data);
     }
+    this._store[table] = list;
+    this._save();
+    return data.id;
+  },
+
+  remove: function(table, key) {
+    var list = this._store[table] || [];
+    this._store[table] = list.filter(function(i) { return i.id !== key; });
+    this._save();
   }
-  return null
+};
+
+function calc1RM(reps, weight) {
+  reps = parseInt(reps) || 0; weight = parseFloat(weight) || 0;
+  if (reps <= 0 || weight <= 0) return 0;
+  return Math.round(weight * (1 + reps / 30) * 10) / 10;
 }
 
-function calcEx1RM(ex){
-  if(!ex.sets||!ex.sets.length)return null
-  let best=null
-  ex.sets.forEach(s=>{
-    const kg=parseFloat(s.kg),reps=parseInt(s.reps)
-    if(kg&&reps&&reps>0){const est=estimate1RM(kg,reps);if(est&&(!best||est>best))best=est}
-  })
-  return best
+function calcVol(sets) {
+  if (!sets) return 0;
+  return sets.reduce(function(a, s) {
+    return a + (parseInt(s.reps) || 0) * (parseFloat(s.weight) || 0);
+  }, 0);
 }
 
-// ================================================================
-// RENDER WORKOUT
-// ================================================================
-function renderWorkout(){
-  const w=state.currentWorkout,empty=document.getElementById('workoutEmpty')
-  const active=document.getElementById('workoutActive')
-  const menu=document.getElementById('workoutSelectMenu')
-
-  // Menu
-  let menuHTML='<button class="btn-start" onclick="startEmpty()">⚡ 自由訓練</button>'
-  state.templates.forEach((t,i)=>{menuHTML+=`<button onclick="startTemplateWorkout(${i})">${esc(t.name)}</button>`})
-  menu.innerHTML=menuHTML
-
-  if(!w){
-    empty.style.display='block'
-    active.style.display='none'
-    return
+/* ===================================================================
+   PR Leaderboard
+   =================================================================== */
+async function updatePR(exerciseName, reps, weight) {
+  var rm = calc1RM(reps, weight);
+  if (rm <= 0) return;
+  var cur = DB.get('pr_records', exerciseName);
+  if (!cur || rm > cur.rm) {
+    DB.put('pr_records', {
+      id: exerciseName,
+      rm: rm,
+      reps: parseInt(reps),
+      weight: parseFloat(weight),
+      date: new Date().toISOString().slice(0, 10)
+    });
+    return true;
   }
-
-  empty.style.display='none'
-  active.style.display='block'
-
-  const exs=w.exercises
-  document.getElementById('workoutNameSpan').textContent=w.name||'⚡ 自由訓練'
-
-  const cs=countSets(exs)
-  document.getElementById('workoutSetsSpan').textContent=`${cs.done}/${cs.total} 組`
-  const pct=cs.total>0?Math.round(cs.done/cs.total*100):0
-  document.getElementById('progressLabel').textContent=cs.done===cs.total?'🎉 全部完成！'+`${pct}%`:`${pct}% 完成`
-  document.getElementById('progressBar').style.width=pct+'%'
-
-  // Find first undone
-  const fu=firstUndone(exs)
-  state.currentExIdx=fu?fu.exIdx:0
-
-  // Build cards
-  const wrap=document.getElementById('exerciseCardsWrap')
-  wrap.innerHTML=exs.map((e,ei)=>{
-    const isCurrent=ei===state.currentExIdx
-    const allDone=e.sets&&e.sets.length&&e.sets.every(s=>s.done)
-    const ex1rm=calcEx1RM(e)
-    return`<div class="exercise-card${isCurrent?' current':''}">
-      <div class="exercise-header">
-        <div>
-          <div class="exercise-name">${esc(e.name)}</div>
-          ${ex1rm!==null?`<div class="exercise-1rm">1RM: ${ex1rm} kg</div>`:''}
-        </div>
-        ${allDone?`<div class="ex-complete-badge">✓ 完成</div>`:`<button class="icon-btn" style="width:32px;height:32px;font-size:14px" onclick="showEditSets(${ei})">✏️</button>`}
-      </div>
-      ${(e.sets||[]).map((s,si)=>{
-        const isThis=fu&&fu.exIdx===ei&&fu.setIdx===si
-        return`<div class="set-row${s.done?' done':''}">
-          <div class="set-num">${si+1}</div>
-          <input type="number" inputmode="decimal" step="0.5" min="0"
-            value="${s.kg||''}" placeholder="kg"
-            onfocus="onSetFocus(this)" onchange="updateSet(${ei},${si},'kg',this.value)"
-            ${s.done?'disabled':''}>
-          <input type="number" inputmode="numeric" step="1" min="0"
-            value="${s.reps||''}" placeholder="次"
-            onfocus="onSetFocus(this)" onchange="updateSet(${ei},${si},'reps',this.value)"
-            ${s.done?'disabled':''}>
-          <div class="btn-check-set${s.done?' done':''}${isThis?' current':''}"
-            onclick="toggleSet(${ei},${si})">${s.done?'✓':''}</div>
-        </div>`
-      }).join('')}
-      <button class="btn-add-set" onclick="addSet(${ei})">＋ 新增</button>
-    </div>`
-  }).join('')
-
-  // Dots
-  document.getElementById('dotsNav').innerHTML=exs.map((e,ei)=>{
-    const allDone=e.sets&&e.sets.every(s=>s.done)
-    return`<div class="dot${ei===state.currentExIdx?' active':''}${allDone?' done':''}"></div>`
-  }).join('')
-
-  // Swipe to first undone
-  if(fu)state.currentExIdx=fu.exIdx
-  updateSwipe()
+  return false;
 }
 
-function onSetFocus(input){
-  // Select all text on focus for easy replace
-  input.select()
-}
-
-// ================================================================
-// SWIPE
-// ================================================================
-let swipeStartX=0,swipeDelta=0,swiping=false
-
-function setupSwipe(){
-  const c=document.getElementById('swipeContainer')
-  if(!c)return
-  c.addEventListener('touchstart',e=>{
-    if(e.touches.length!==1)return
-    swipeStartX=e.touches[0].clientX;swipeDelta=0;swiping=true
-    document.getElementById('exerciseCardsWrap').classList.add('swiping')
-  },{passive:true})
-  c.addEventListener('touchmove',e=>{
-    if(!swiping||e.touches.length!==1)return
-    swipeDelta=e.touches[0].clientX-swipeStartX
-    updateSwipeOffset()
-  },{passive:true})
-  c.addEventListener('touchend',()=>{
-    if(!swiping)return
-    swiping=false
-    document.getElementById('exerciseCardsWrap').classList.remove('swiping')
-    const threshold=80
-    if(swipeDelta<-threshold&&state.currentExIdx<state.currentWorkout.exercises.length-1){
-      state.currentExIdx++
-    }else if(swipeDelta>threshold&&state.currentExIdx>0){
-      state.currentExIdx--
-    }
-    updateSwipe()
-    renderDots()
-  })
-}
-
-function updateSwipeOffset(){
-  const wrap=document.getElementById('exerciseCardsWrap')
-  if(!wrap)return
-  const ex=state.currentWorkout.exercises.length
-  const offset=-state.currentExIdx*100
-  const extra=ex>1?swipeDelta/wrap.parentElement.offsetWidth*100:0
-  wrap.style.transform=`translateX(${offset+extra}%)`
-}
-
-function updateSwipe(){
-  const wrap=document.getElementById('exerciseCardsWrap')
-  if(!wrap)return
-  wrap.style.transform=`translateX(-${state.currentExIdx*100}%)`
-  highlightCurrent()
-}
-
-function highlightCurrent(){
-  document.querySelectorAll('.exercise-card').forEach((c,i)=>{
-    c.classList.toggle('current',i===state.currentExIdx)
-  })
-}
-
-function renderDots(){
-  const dots=document.querySelectorAll('.dot')
-  const exs=state.currentWorkout?.exercises||[]
-  dots.forEach((d,i)=>{
-    d.classList.toggle('active',i===state.currentExIdx)
-    d.classList.toggle('done',exs[i]?.sets&&exs[i].sets.every(s=>s.done))
-  })
-}
-
-// ================================================================
-// WORKOUT ACTIONS
-// ================================================================
-function updateSet(ei,si,field,val){
-  if(!state.currentWorkout)return
-  const ex=state.currentWorkout.exercises[ei]
-  if(!ex||!ex.sets||!ex.sets[si])return
-  ex.sets[si][field]=val
-  // Don't re-render on every keystroke — will be handled by toggleSet
-  updateProgressOnly()
-}
-
-function updateProgressOnly(){
-  const w=state.currentWorkout
-  if(!w)return
-  const cs=countSets(w.exercises)
-  document.getElementById('workoutSetsSpan').textContent=`${cs.done}/${cs.total} 組`
-  const pct=cs.total>0?Math.round(cs.done/cs.total*100):0
-  document.getElementById('progressLabel').textContent=cs.done===cs.total?'🎉 全部完成！':`${pct}% 完成`
-  document.getElementById('progressBar').style.width=pct+'%'
-}
-
-function toggleSet(ei,si){
-  const w=state.currentWorkout
-  if(!w)return
-  const ex=w.exercises[ei]
-  if(!ex||!ex.sets||!ex.sets[si])return
-  const set=ex.sets[si]
-
-  // Toggle done
-  const wasDone=set.done
-  set.done=!set.done
-
-  if(set.done&&!wasDone){
-    // Save as "last weight" for future prefills
-    const kg=parseFloat(set.kg),reps=parseInt(set.reps)
-    if(kg)saveLastWeight(ex.name,kg,set.reps)
-
-    // Auto-start rest timer (only if kg+reps filled)
-    if(kg&&reps&&reps>0){
-      // Find next undone set
-      startTimer(timerPreset,()=>{
-        // Auto-skip to next set when timer's done
-        advanceToNext()
-      })
-    }
+async function renderPR() {
+  var records = DB.all('pr_records');
+  var list = document.getElementById('prList');
+  if (!records || records.length === 0) {
+    list.innerHTML = '<div class="empty-state"><i class="fas fa-trophy"></i><p>還沒有 PR 紀錄<br>開始訓練並完成組數後，最高 RM 會自動記錄在這裡 🏆</p></div>';
+    return;
   }
-
-  // Re-render (full render to update card states)
-  renderWorkoutAfterToggle()
-
-  // Check all done
-  const cs=countSets(w.exercises)
-  if(cs.done===cs.total&&cs.total>0){
-    setTimeout(()=>showFinishConfirm(),400)
-  }
+  records.sort(function(a, b) { return b.rm - a.rm; });
+  var h = '';
+  records.forEach(function(r, i) {
+    var rk = '';
+    if (i === 0) rk = 'gold';
+    else if (i === 1) rk = 'silver';
+    else if (i === 2) rk = 'bronze';
+    h += '<div class="pr-item">';
+    h += '<div class="rank ' + rk + '">#' + (i + 1) + '</div>';
+    h += '<div class="pr-info"><div class="pr-name">' + esc(r.id) + '</div>';
+    h += '<div class="pr-detail"><div class="pr-record">' + r.weight + '<span class="pr-record-unit">kg</span></div><div class="pr-date">' + r.date + '</div></div></div>';
+    h += '<div class="pr-rm">' + r.rm + ' <span class="rm-unit">kg</span></div>';
+    h += '</div>';
+  });
+  list.innerHTML = h;
 }
 
-function renderWorkoutAfterToggle(){
-  const w=state.currentWorkout
-  if(!w)return
-  const exs=w.exercises
-
-  // Recalculate current idx based on first undone
-  const fu=firstUndone(exs)
-  if(fu)state.currentExIdx=fu.exIdx
-
-  // Update progress
-  const cs=countSets(exs)
-  document.getElementById('workoutSetsSpan').textContent=`${cs.done}/${cs.total} 組`
-  const pct=cs.total>0?Math.round(cs.done/cs.total*100):0
-  document.getElementById('progressLabel').textContent=cs.done===cs.total?'🎉 全部完成！':`${pct}% 完成`
-  document.getElementById('progressBar').style.width=pct+'%'
-
-  // Re-render just the set check buttons and card states — faster than full rebuild
-  document.querySelectorAll('.exercise-card').forEach((card,ei)=>{
-    const ex=exs[ei]
-    if(!ex)return
-
-    // Card highlight
-    card.classList.toggle('current',ei===state.currentExIdx)
-
-    // All done badge
-    const allDone=ex.sets&&ex.sets.length&&ex.sets.every(s=>s.done)
-    const headerActions=card.querySelector('.exercise-header .icon-btn')
-    const badge=card.querySelector('.ex-complete-badge')
-    if(allDone){
-      if(!badge){
-        const div=card.querySelector('.exercise-header>div:last-child')||card.querySelector('.exercise-header>div')
-        if(div){
-          // Remove edit btn, add badge
-          if(headerActions)headerActions.remove()
-          const h=card.querySelector('.exercise-header')
-          const b=document.createElement('div')
-          b.className='ex-complete-badge'
-          b.textContent='✓ 完成'
-          // Actually just re-render fully for simplicity
+function recalcPR() {
+  var workouts = DB.all('workouts');
+  var prMap = {};
+  workouts.forEach(function(w) {
+    (w.exercises || []).forEach(function(ex) {
+      (ex.sets || []).forEach(function(s) {
+        if (s.done && s.reps > 0 && s.weight > 0) {
+          var rm = calc1RM(s.reps, s.weight);
+          if (rm > 0 && (!prMap[ex.name] || rm > prMap[ex.name].rm)) {
+            prMap[ex.name] = { rm: rm, reps: s.reps, weight: s.weight, date: w.date };
+          }
         }
-      }
-    }else{
-      if(badge)badge.remove()
+      });
+    });
+  });
+  // 重寫 pr_records
+  DB._store.pr_records = Object.keys(prMap).map(function(k) {
+    return { id: k, rm: prMap[k].rm, reps: prMap[k].reps, weight: prMap[k].weight, date: prMap[k].date };
+  });
+  DB._save();
+  if (document.getElementById('pageLeaderboard').classList.contains('active')) {
+    renderPR();
+  }
+}
+
+function renderSettings() {
+  var body = document.getElementById('settingsBody');
+  var curSec = parseInt(localStorage.getItem('wt_restSeconds')) || 90;
+  var h = '<div style="text-align:center;padding:20px 0 10px;font-size:22px;font-weight:800;color:var(--accent);letter-spacing:1px;">我獨自升級 V1.0</div>';
+  h += '<div class="settings-section">';
+  h += '<h4>⏱️ 休息倒數秒數</h4>';
+  h += '<input type="number" class="settings-rest-input" id="restSecInput" value="' + curSec + '" min="5" step="5" autocomplete="off">';
+  h += '<div class="settings-rest-input-desc">輸入休息秒數（至少 5 秒）</div>';
+  h += '</div>';
+  h += '<div class="settings-section">';
+  h += '<h4>⚠️ 危險區域</h4>';
+  h += '<button class="btn-reset-data" id="resetDataBtn"><i class="fas fa-trash-alt"></i> 重設所有資料</button>';
+  h += '<div class="settings-rest-input-desc" style="margin-top:6px;">刪除所有範本、訓練紀錄、PR 排行榜資料，無法復原。</div>';
+  h += '</div>';
+  body.innerHTML = h;
+}
+
+/* ===================================================================
+   Templates — 訓練範本 (V6: 分欄位 + 點卡片編輯 + 開始按鈕)
+   =================================================================== */
+var editingTplId = null;
+
+async function renderTemplates() {
+  var templates = DB.all('templates');
+  var list = document.getElementById('tplList');
+  if (!templates || templates.length === 0) {
+    list.innerHTML = '<div class="empty-state"><i class="fas fa-dumbbell"></i><p>還沒有訓練範本<br>點擊下方按鈕建立第一個 💪</p></div>' +
+        '<div style="text-align:center;padding:20px 0"><button class="btn-primary" id="tplNewBtn"><i class="fas fa-plus"></i> 新增範本</button></div>';
+    return;
+  }
+  var h = '<div class="tpl-grid">';
+  templates.forEach(function(t) {
+    h += '<div class="tpl-card" data-tpl="' + t.id + '">';
+    h += '<div class="tpl-name">' + esc(t.name) + '</div>';
+    h += '<div class="tpl-meta"><span><i class="fas fa-dumbbell"></i>' + t.exercises.length + ' 動作</span></div>';
+    h += '<div class="tpl-ex-preview">';
+    t.exercises.forEach(function(ex) {
+      h += '<span class="tag">' + esc(ex.name) + '</span>';
+    });
+    h += '</div>';
+    h += '<div class="tpl-actions">';
+    h += '<button class="btn-start tpl-start-btn" data-tpl="' + t.id + '"><i class="fas fa-play"></i> 開始訓練</button>';
+    h += '<button class="btn-secondary tpl-edit-btn" data-tpl="' + t.id + '"><i class="fas fa-pen"></i> 編輯</button>';
+    h += '</div></div>';
+  });
+  h += '</div>';
+  h += '<div style="text-align:center;padding:16px 0"><button class="btn-primary" id="tplNewBtn"><i class="fas fa-plus"></i> 新增範本</button></div>';
+  list.innerHTML = h;
+}
+
+function showTplEditModal(tpl) {
+  var title = document.getElementById('tplModalTitle');
+  var nameInput = document.getElementById('tplNameInput');
+  var exList = document.getElementById('tplExList');
+  var actions = document.getElementById('tplModalActions');
+
+  if (tpl) {
+    editingTplId = tpl.id;
+    title.textContent = '✏️ 編輯範本';
+    nameInput.value = tpl.name;
+    renderTplExRows(tpl.exercises);
+    // show delete button
+    if (!document.getElementById('tplModalDelete')) {
+      var delBtn = document.createElement('button');
+      delBtn.id = 'tplModalDelete';
+      delBtn.className = 'btn-danger';
+      delBtn.innerHTML = '<i class="fas fa-trash"></i> 刪除範本';
+      actions.appendChild(delBtn);
     }
+    document.getElementById('tplModalDelete').style.display = 'inline-flex';
+  } else {
+    editingTplId = null;
+    title.textContent = '📋 新增範本';
+    nameInput.value = '';
+    renderTplExRows([{ name: '', reps: 10, weight: 60 }]);
+    var delBtn = document.getElementById('tplModalDelete');
+    if (delBtn) delBtn.style.display = 'none';
+  }
+  document.getElementById('tplModal').classList.add('show');
+  setTimeout(function() { nameInput.focus(); }, 100);
+}
 
-    // Update each set row
-    const rows=card.querySelectorAll('.set-row')
-    rows.forEach((row,si)=>{
-      const set=ex.sets[si]
-      if(!set)return
-      const isCurrent=fu&&fu.exIdx===ei&&fu.setIdx===si
-      row.classList.toggle('done',set.done)
+function renderTplExRows(exercises) {
+  var container = document.getElementById('tplExList');
+  var h = '';
+  exercises.forEach(function(ex, i) {
+    h += '<div class="tpl-ex-row" data-ex-idx="' + i + '">';
+    h += '<div class="ex-fields">';
+    h += '<input type="text" class="ex-name-input" value="' + esc(ex.name) + '" placeholder="動作名">';
+    h += '<input type="number" class="num-input ex-reps-input" value="' + (ex.reps || 10) + '" min="0" placeholder="次數">';
+    h += '<input type="number" class="num-input ex-weight-input" value="' + (ex.weight || 60) + '" step="0.5" min="0" placeholder="重量">';
+    h += '</div>';
+    h += '<button class="ex-del" data-ex-idx="' + i + '"><i class="fas fa-times"></i></button>';
+    h += '</div>';
+  });
+  container.innerHTML = h;
+}
 
-      const inputs=row.querySelectorAll('input')
-      if(inputs[0]){inputs[0].value=set.kg||'';inputs[0].disabled=set.done}
-      if(inputs[1]){inputs[1].value=set.reps||'';inputs[1].disabled=set.done}
+function collectExFromRows() {
+  var rows = document.querySelectorAll('#tplExList .tpl-ex-row');
+  var exercises = [];
+  rows.forEach(function(row) {
+    var name = row.querySelector('.ex-name-input').value.trim();
+    var reps = parseInt(row.querySelector('.ex-reps-input').value) || 0;
+    var weight = parseFloat(row.querySelector('.ex-weight-input').value) || 0;
+    if (name) {
+      exercises.push({ name: name, reps: reps, weight: weight });
+    }
+  });
+  return exercises;
+}
 
-      const btn=row.querySelector('.btn-check-set')
-      if(btn){
-        btn.classList.toggle('done',set.done)
-        btn.classList.toggle('current',isCurrent)
-        btn.textContent=set.done?'✓':''
-      }
+/* ===================================================================
+   Workout Session
+   =================================================================== */
+var currentSession = null;
+var sessionTimerInterval = null;
+
+function startSession(tpl) {
+  // 從範本建立 session，但組數由訓練中自行新增，初始只有1組
+  currentSession = {
+    templateId: tpl.id,
+    templateName: tpl.name,
+    startTime: Date.now(),
+    exercises: tpl.exercises.map(function(ex) {
+      return {
+        name: ex.name,
+        sets: [{ reps: parseInt(ex.reps) || 10, weight: parseFloat(ex.weight) || 0, done: false }]
+      };
     })
-  })
-
-  // Update dots
-  renderDots()
-  updateSwipe()
+  };
+  switchPage('workout');
+  renderWorkout();
+  startSessionTimer();
 }
 
-function advanceToNext(){
-  const w=state.currentWorkout
-  if(!w)return
-  const fu=firstUndone(w.exercises)
-  if(fu){
-    state.currentExIdx=fu.exIdx
-    updateSwipe()
-    renderDots()
-    // Focus the kg input of the next set
-    setTimeout(()=>{
-      const card=document.querySelectorAll('.exercise-card')[fu.exIdx]
-      if(card){
-        const inputs=card.querySelectorAll('.set-row:not(.done) input')
-        if(inputs.length>0)inputs[0].focus()
+function renderWorkout() {
+  if (!currentSession) {
+    document.getElementById('wsBody').innerHTML = '<div class="empty-state"><i class="fas fa-play-circle"></i><p>請先選擇一個訓練範本開始 🏋️</p></div>';
+    return;
+  }
+  document.getElementById('wsTitle').textContent = '🏋️ ' + currentSession.templateName;
+  document.getElementById('wsDate').innerHTML = '<i class="fas fa-calendar-day"></i> ' + fmtDate(new Date(currentSession.startTime));
+  updateSessionTimer();
+
+  var body = document.getElementById('wsBody');
+  var h = '';
+  var allDone = true;
+  currentSession.exercises.forEach(function(ex, i) {
+    var exDone = ex.sets.length > 0 && ex.sets.every(function(s) { return s.done; });
+    if (!exDone) allDone = false;
+    h += '<div class="ex-card' + (exDone ? ' done' : '') + '">';
+    h += '<div class="ex-hdr">';
+    h += '<div class="ex-name">' + esc(ex.name) + '</div>';
+    if (exDone) h += '<span class="ex-done-badge"><i class="fas fa-check-circle"></i></span>';
+h += '<div class="ex-actions"></div>';
+    h += '</div>';
+    h += '<div class="set-list">';
+    ex.sets.forEach(function(set, si) {
+      var done = set.done;
+      h += '<div class="set-row' + (done ? ' done' : '') + '">';
+      h += '<div class="set-chk' + (done ? ' checked' : '') + '" data-ws-chk="' + i + '-' + si + '">' + (done ? '✓' : '') + '</div>';
+      h += '<span class="set-num">#' + (si + 1) + '</span>';
+      h += '<span class="set-detail"><input class="set-edit-input sn" value="' + set.reps + '" data-ws-set-reps="' + i + '-' + si + '"> × <input class="set-edit-input sw" value="' + set.weight + '" data-ws-set-wt="' + i + '-' + si + '"> kg</span>';
+      h += '<button class="set-del" data-ws-del="' + i + '-' + si + '"><i class="fas fa-trash-alt"></i></button>';
+      h += '</div>';
+    });
+    h += '<div class="add-set-btn" data-ws-add="' + i + '"><i class="fas fa-plus"></i> 新增組</div>';
+    h += '</div></div>';
+  });
+  h += '<div class="empty-state" style="flex:none;padding:20px 0"><p>' + (allDone ? '✅ 所有動作已完成！點擊下方「完成訓練」儲存紀錄' : '點選方塊勾選完成的組 🎯') + '</p></div>';
+  body.innerHTML = h;
+}
+
+function startSessionTimer() {
+  if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+  sessionTimerInterval = setInterval(updateSessionTimer, 1000);
+}
+
+function updateSessionTimer() {
+  if (!currentSession) return;
+  var elapsed = Math.floor((Date.now() - currentSession.startTime) / 1000);
+  var m = Math.floor(elapsed / 60);
+  var s = elapsed % 60;
+  document.getElementById('wsElapsed').textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+
+async function finishWorkout() {
+  if (!currentSession) return;
+  var totalVol = 0;
+  currentSession.exercises.forEach(function(ex) {
+    ex.sets.forEach(function(s) {
+      totalVol += (parseInt(s.reps) || 0) * (parseFloat(s.weight) || 0);
+    });
+  });
+  var duration = Math.floor((Date.now() - currentSession.startTime) / 1000);
+  var entry = {
+    date: new Date().toISOString(),
+    templateName: currentSession.templateName,
+    templateId: currentSession.templateId,
+    exercises: currentSession.exercises.map(function(ex) {
+      return { name: ex.name, sets: ex.sets.map(function(s) { return { reps: s.reps, weight: s.weight, done: s.done }; }) };
+    }),
+    totalVolume: totalVol,
+    duration: duration,
+    completedSets: currentSession.exercises.reduce(function(a, ex) { return a + ex.sets.filter(function(s) { return s.done; }).length; }, 0)
+  };
+  DB.put('workouts', entry);
+
+  var prCount = 0;
+  for (var ei = 0; ei < currentSession.exercises.length; ei++) {
+    var ex = currentSession.exercises[ei];
+    for (var si = 0; si < ex.sets.length; si++) {
+      var set = ex.sets[si];
+      if (set.done) {
+        var isPR = await updatePR(ex.name, set.reps, set.weight);
+        if (isPR) prCount++;
       }
-    },300)
-  }
-}
-
-function addSet(ei){
-  if(!state.currentWorkout)return
-  const ex=state.currentWorkout.exercises[ei]
-  if(!ex)return
-  if(!ex.sets)ex.sets=[]
-  // Prefill from last weight
-  const last=getLastWeight(ex.name)
-  ex.sets.push({kg:last.kg||'',reps:last.reps||'',done:false})
-  renderWorkout()
-  toast('新增一組')
-}
-
-function showEditSets(ei){
-  if(!state.currentWorkout)return
-  const ex=state.currentWorkout.exercises[ei]
-  if(!ex)return
-  document.getElementById('editSetsExerciseName').textContent=ex.name
-  const c=document.getElementById('editSetsContainer')
-  c.innerHTML=(ex.sets||[]).map((s,si)=>`
-    <div class="set-row" style="grid-template-columns:1fr 1fr 1fr auto">
-      <div class="form-group"><label>組${si+1}</label><input type="number" inputmode="decimal" step="0.5" min="0" value="${s.kg||''}" onchange="state.currentWorkout.exercises[${ei}].sets[${si}].kg=this.value"></div>
-      <div class="form-group"><label>次數</label><input type="number" inputmode="numeric" step="1" min="0" value="${s.reps||''}" onchange="state.currentWorkout.exercises[${ei}].sets[${si}].reps=this.value"></div>
-      <div class="form-group"><label>✓</label><input type="checkbox" ${s.done?'checked':''} onchange="state.currentWorkout.exercises[${ei}].sets[${si}].done=this.checked"></div>
-      <button style="margin-top:20px;padding:4px 8px;border-radius:12px;background:var(--danger);color:#fff;font-size:12px" onclick="state.currentWorkout.exercises[${ei}].sets.splice(${si},1);showEditSets(${ei});renderWorkout()">✕</button>
-    </div>
-  `).join('')+`<button class="btn-secondary" onclick="state.currentWorkout.exercises[${ei}].sets.push({kg:'',reps:'',done:false});showEditSets(${ei});renderWorkout()">＋ 新增組</button>`
-  showModal('editSetsModal')
-}
-
-// ================================================================
-// START WORKOUT
-// ================================================================
-function startEmpty(){
-  state.currentWorkout={name:'⚡ 自由訓練',startedAt:new Date().toISOString(),exercises:[]}
-  renderWorkout()
-}
-function startTemplateWorkout(idx){
-  const t=state.templates[idx]
-  if(!t)return
-  const ex=t.exercises.map(e=>{
-    const sets=(e.sets&&e.sets.length)?JSON.parse(JSON.stringify(e.sets)):[{kg:'',reps:'',done:false}]
-    // Prefill weights from last session
-    const last=getLastWeight(e.name)
-    if(last.kg||last.reps){
-      sets.forEach(s=>{
-        if(!s.kg&&last.kg)s.kg=last.kg
-        if(!s.reps&&last.reps)s.reps=last.reps
-      })
     }
-    return{...e,sets}
-  })
-  state.currentWorkout={name:t.name,startedAt:new Date().toISOString(),exercises:ex}
-  renderWorkout()
-  // Switch to workout tab
-  const tb=document.querySelector('.tab-bar button[data-tab="tabWorkout"]')
-  if(tb)switchTab('tabWorkout',tb)
-  // Setup swipe after render
-  setTimeout(setupSwipe,100)
-  toast(`「${t.name}」開始！`)
-}
-
-// ================================================================
-// FINISH WORKOUT
-// ================================================================
-function showFinishConfirm(){
-  if(!state.currentWorkout)return
-  const w=state.currentWorkout
-  const cs=countSets(w.exercises)
-  if(cs.done===0&&!confirm('還沒有完成任何組，確定結束？'))return
-
-  const summary=w.exercises
-    .filter(e=>e.sets&&e.sets.some(s=>s.kg&&s.reps))
-    .map(e=>{
-      const done=(e.sets||[]).filter(s=>s.done&&s.kg&&s.reps)
-      const vol=done.reduce((sum,s)=>sum+parseFloat(s.kg)*parseInt(s.reps),0)
-      const rm=calcEx1RM(e)
-      return `${esc(e.name)}: ${done.length}組 / ${vol.toFixed(0)}kg${rm?` / 1RM:${rm}kg`:''}`
-    }).join('\n')
-
-  document.getElementById('finishSummary').textContent=summary||'(無資料)'
-  showModal('finishConfirmModal')
-}
-
-function finishWorkout(){
-  if(!state.currentWorkout)return
-  closeModal('finishConfirmModal')
-
-  const w=state.currentWorkout
-  const now=new Date()
-  const dateStr=now.toLocaleDateString('zh-TW',{month:'numeric',day:'numeric',weekday:'short'})
-  const timeStr=now.toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})
-
-  const summary=w.exercises
-    .filter(e=>e.sets&&e.sets.some(s=>s.kg&&s.reps))
-    .map(e=>{
-      const done=(e.sets||[]).filter(s=>s.done&&s.kg&&s.reps)
-      const vol=done.reduce((sum,s)=>sum+parseFloat(s.kg)*parseInt(s.reps),0)
-      const rm=calcEx1RM(e)
-      return `${esc(e.name)}: ${done.length}組 / ${vol.toFixed(0)}kg${rm?` / 1RM:${rm}kg`:''}`
-    }).join('\n')
-
-  state.history.unshift({
-    date:dateStr,time:timeStr,
-    name:w.name||'自由訓練',duration:'',
-    iso:now.toISOString(),
-    summary:summary,
-    exercises:JSON.parse(JSON.stringify(w.exercises))
-  })
-  sv(KEYS.history,state.history)
-  state.currentWorkout=null
-  renderWorkout()
-  renderHistory()
-
-  // Celebration
-  const empty=document.getElementById('workoutEmpty')
-  empty.style.display='block'
-  empty.innerHTML=`<div class="celebration">
-    <div class="big">🎉</div>
-    <h2>訓練完成！</h2>
-    <p>${summary.split('\n').length} 個動作</p>
-  </div>`
-  setTimeout(()=>{
-    empty.innerHTML=`<div class="big-icon">🏋️</div><p>選擇菜單開始訓練</p><p class="sub">或點「⚡ 自由訓練」</p>`
-  },3000)
-
-  if(navigator.vibrate)navigator.vibrate(50)
-  toast('✅ 訓練已儲存')
-}
-
-// ================================================================
-// HISTORY
-// ================================================================
-function renderHistory(){
-  const c=document.getElementById('historyList'),h=state.history
-  if(!h.length){
-    c.innerHTML='<div class="empty-state"><div class="big-icon">📊</div><p>還沒有訓練紀錄</p></div>'
-    return
   }
-  c.innerHTML=h.map(e=>`
-    <div class="history-item" onclick="this.querySelector('.history-detail').style.display=this.querySelector('.history-detail').style.display==='none'?'block':'none'">
-      <div class="history-date">${esc(e.date)} ${esc(e.time||'')}</div>
-      <div class="history-name">${esc(e.name||'自由訓練')}</div>
-      <div class="history-summary">${e.exercises?e.exercises.filter(x=>x.sets&&x.sets.some(s=>s.kg)).length+' 個動作':''}</div>
-      <div class="history-detail" style="display:none"><pre style="font-family:inherit;white-space:pre-wrap;font-size:12px;color:var(--text3);margin-top:4px">${esc(e.summary||'')}</pre></div>
-    </div>
-  `).join('')
+
+  stopSession();
+  switchPage('history');
+  renderHistory();
+  var msg = '✅ 訓練已完成！' + (prCount > 0 ? ' 🏆 新增 ' + prCount + ' 項 PR！' : '');
+  showToast(msg);
 }
 
-function clearHistory(){
-  if(!confirm('確定清除所有訓練紀錄？'))return
-  state.history=[]
-  sv(KEYS.history,state.history)
-  renderHistory()
+function stopSession() {
+  if (sessionTimerInterval) { clearInterval(sessionTimerInterval); sessionTimerInterval = null; }
+  restTimerClose();
+  currentSession = null;
+  renderWorkout();
 }
 
-// ================================================================
-// DATA EXPORT/IMPORT
-// ================================================================
-function exportAllData(){
-  const data={exercises:state.exercises,templates:state.templates,history:state.history,lastWeights:state.lastWeights,exportedAt:new Date().toISOString()}
-  const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'})
-  const u=URL.createObjectURL(b)
-  const a=document.createElement('a');a.href=u
-  a.download=`gymtracker_${new Date().toISOString().slice(0,10)}.json`
-  a.click();URL.revokeObjectURL(u)
+function cancelWorkout() {
+  stopSession();
+  switchPage('templates');
+  renderTemplates();
+  showToast('訓練已放棄');
 }
-function importAllData(event){
-  const file=event.target.files[0]
-  if(!file)return
-  const r=new FileReader()
-  r.onload=function(e){
-    try{
-      const data=JSON.parse(e.target.result)
-      if(data.exercises){state.exercises=data.exercises;sv(KEYS.exercises,state.exercises)}
-      if(data.templates){state.templates=data.templates;sv(KEYS.templates,state.templates)}
-      if(data.history){state.history=data.history;sv(KEYS.history,state.history)}
-      if(data.lastWeights){state.lastWeights=data.lastWeights;sv(KEYS.lastWeights,state.lastWeights)}
-      toast('✅ 匯入成功！')
-      renderExercises();renderTemplates();renderHistory()
-    }catch(err){toast('❌ 匯入失敗，格式不正確')}
+
+/* ===================================================================
+   Rest Timer Modal
+   =================================================================== */
+var restTimer = { sec: 0, total: 0, run: false, iv: null };
+
+function showRestTimer() {
+  var sec = parseInt(localStorage.getItem('wt_restSeconds')) || 90;
+  restTimer.sec = sec;
+  restTimer.total = sec;
+  restTimer.run = false;
+  if (restTimer.iv) { clearInterval(restTimer.iv); restTimer.iv = null; }
+  document.getElementById('rtDisplay').textContent = Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0');
+  document.getElementById('rtStart').textContent = '▶ 開始';
+  document.getElementById('rtStart').style.background = 'var(--accent)';
+  document.getElementById('restTimerModal').classList.add('show');
+}
+
+/* 提示音 */
+function playBeep() {
+  try {
+    var actx = new (window.AudioContext || window.webkitAudioContext)();
+    var osc = actx.createOscillator();
+    osc.type = 'square';
+    osc.frequency.value = 880;
+    var gain = actx.createGain();
+    gain.gain.value = 0.3;
+    osc.connect(gain);
+    gain.connect(actx.destination);
+    osc.start();
+    osc.stop(actx.currentTime + 0.2);
+  } catch(_) {}
+}
+
+function restTimerStart() {
+  if (restTimer.run) { restTimerStop(); return; }
+  if (restTimer.sec <= 0) { restTimer.sec = restTimer.total; }
+  restTimer.run = true;
+  document.getElementById('rtStart').textContent = '⏸ 暫停';
+  document.getElementById('rtStart').style.background = 'var(--blue)';
+  restTimer.iv = setInterval(function() {
+    restTimer.sec--;
+    var m = Math.floor(restTimer.sec / 60);
+    var s = restTimer.sec % 60;
+    document.getElementById('rtDisplay').textContent = m + ':' + String(s).padStart(2, '0');
+    // 最後 3 秒每秒逼一聲
+    if (restTimer.sec > 0 && restTimer.sec <= 3) { playBeep(); }
+    if (restTimer.sec <= 0) {
+      clearInterval(restTimer.iv); restTimer.iv = null; restTimer.run = false;
+      document.getElementById('rtDisplay').textContent = '⏰ Time!';
+      document.getElementById('rtStart').textContent = '✕ 關閉';
+      document.getElementById('rtStart').style.background = 'var(--accent)';
+    }
+  }, 1000);
+}
+
+function restTimerStop() {
+  if (restTimer.iv) { clearInterval(restTimer.iv); restTimer.iv = null; }
+  restTimer.run = false;
+}
+
+function restTimerClose() {
+  restTimerStop();
+  document.getElementById('restTimerModal').classList.remove('show');
+}
+
+/* ===================================================================
+   History
+   =================================================================== */
+async function renderHistory() {
+  var workouts = DB.all('workouts');
+  var list = document.getElementById('histList');
+  document.getElementById('histSub').textContent = workouts.length + ' 筆訓練記錄';
+  if (!workouts || workouts.length === 0) {
+    list.innerHTML = '<div class="empty-state"><i class="fas fa-history"></i><p>還沒有訓練記錄<br>完成訓練後就會出現在這裡 📜</p></div>';
+    return;
   }
-  r.readAsText(file)
-  event.target.value=''
+  workouts.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+  var h = '<div class="stat-row">';
+  h += '<div class="stat-card"><div class="stat-val green">' + workouts.length + '</div><div class="stat-label">訓練次數</div></div>';
+  var totalV = workouts.reduce(function(a, w) { return a + (w.totalVolume || 0); }, 0);
+  h += '<div class="stat-card"><div class="stat-val">' + totalV.toLocaleString() + '</div><div class="stat-label">總訓練量 (kg)</div></div>';
+  var totalSets = workouts.reduce(function(a, w) { return a + (w.completedSets || 0); }, 0);
+  h += '<div class="stat-card"><div class="stat-val">' + totalSets + '</div><div class="stat-label">完成組數</div></div>';
+  h += '</div>';
+
+  workouts.forEach(function(w) {
+    var d = new Date(w.date);
+    var dow = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
+    var dur = '';
+    if (w.duration) {
+      var m = Math.floor(w.duration / 60);
+      var s = w.duration % 60;
+      dur = m + 'm' + s + 's';
+    }
+    h += '<div class="hist-item" data-wsid="' + w.id + '">';
+    h += '<button class="hist-del-btn" data-ws-del-hist="' + w.id + '"><i class="fas fa-times"></i></button>';
+    h += '<div class="hist-date">' + fmtDate(d) + ' <span class="hist-dow">' + dow + '</span></div>';
+    h += '<div class="hist-meta">';
+    h += '<span><i class="fas fa-tag"></i> ' + esc(w.templateName) + '</span>';
+    h += '<span><i class="fas fa-clock"></i> ' + dur + '</span>';
+    h += '<span><i class="fas fa-weight-hanging"></i> ' + (w.totalVolume || 0).toLocaleString() + ' kg</span>';
+    h += '<span><i class="fas fa-check-circle"></i> ' + (w.completedSets || 0) + ' 組</span>';
+    h += '</div>';
+    h += '<div class="hist-ex-list">';
+    (w.exercises || []).forEach(function(ex) {
+      var exDone = ex.sets ? ex.sets.filter(function(s) { return s.done; }).length : 0;
+      var exTotal = ex.sets ? ex.sets.length : 0;
+      h += '<span class="hist-ex-tag">' + esc(ex.name) + ' <span style="color:var(--accent)">' + exDone + '/' + exTotal + '</span></span>';
+    });
+    h += '</div></div>';
+  });
+  list.innerHTML = h;
 }
 
-// ================================================================
-// UTILITY
-// ================================================================
-function esc(s){
-  if(s==null)return''
-  const d=document.createElement('div');d.textContent=String(s);return d.innerHTML
+/* ===================================================================
+   History
+   =================================================================== */
+function switchPage(name) {
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+  document.getElementById('page' + name.charAt(0).toUpperCase() + name.slice(1)).classList.add('active');
+  document.querySelector('.nav-item[data-page="' + name + '"]').classList.add('active');
 }
 
-// ================================================================
-// INIT
-// ================================================================
-function init(){
-  state.exercises.forEach((ex,i)=>{if(!ex.id)ex.id='ex_'+Date.now()+'_'+i})
-  if(!state.lastWeights||!Object.keys(state.lastWeights).length)state.lastWeights={}
-  sv(KEYS.exercises,state.exercises)
-  renderWorkout()
-  renderExercises()
-  renderTemplates()
-  renderHistory()
+function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function showToast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(function() { el.classList.remove('show'); }, 2000);
 }
-init()
+
+function fmtDate(d) {
+  return d.getFullYear() + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0');
+}
+
+/* ===================================================================
+   Events
+   =================================================================== */
+document.addEventListener('click', async function(e) {
+  // ====== Nav ======
+  var nav = e.target.closest('.nav-item');
+  if (nav) {
+    var page = nav.dataset.page;
+    switchPage(page);
+    if (page === 'templates') renderTemplates();
+    else if (page === 'history') renderHistory();
+    else if (page === 'leaderboard') renderPR();
+    else if (page === 'settings') renderSettings();
+    else if (page === 'workout') renderWorkout();
+    return;
+  }
+
+  // ====== Start training (green button on card) ======
+  var startBtn = e.target.closest('.tpl-start-btn');
+  if (startBtn) {
+    var tplId = parseInt(startBtn.dataset.tpl);
+    var tpl = DB.get('templates', tplId);
+    if (tpl) startSession(tpl);
+    return;
+  }
+
+  // ====== Edit template (pen button on card) ======
+  var editBtn = e.target.closest('.tpl-edit-btn');
+  if (editBtn) {
+    var tplId = parseInt(editBtn.dataset.tpl);
+    var tpl = DB.get('templates', tplId);
+    if (tpl) showTplEditModal(tpl);
+    return;
+  }
+
+  // ====== Template card click ======
+  var tplCard = e.target.closest('.tpl-card');
+  if (tplCard) {
+    // 點卡片本身打開編輯 modal（避開按鈕區域）
+    if (!e.target.closest('button')) {
+      var tplId = parseInt(tplCard.dataset.tpl);
+      var tpl = DB.get('templates', tplId);
+      if (tpl) showTplEditModal(tpl);
+    }
+    return;
+  }
+
+  // ====== New template ======
+  if (e.target.closest('#tplNewBtn')) {
+    showTplEditModal(null);
+    return;
+  }
+
+  // ====== Template modal add exercise ======
+  if (e.target.closest('#tplExAdd')) {
+    var container = document.getElementById('tplExList');
+    var idx = container.querySelectorAll('.tpl-ex-row').length;
+    var row = document.createElement('div');
+    row.className = 'tpl-ex-row';
+    row.dataset.exIdx = idx;
+    row.innerHTML = '<div class="ex-fields">' +
+      '<input type="text" class="ex-name-input" placeholder="動作名">' +
+      '<input type="number" class="num-input ex-reps-input" value="10" min="0" placeholder="次數">' +
+      '<input type="number" class="num-input ex-weight-input" value="60" step="0.5" min="0" placeholder="重量">' +
+      '</div>' +
+      '<button class="ex-del"><i class="fas fa-times"></i></button>';
+    container.appendChild(row);
+    // focus the name field
+    row.querySelector('.ex-name-input').focus();
+    return;
+  }
+
+  // ====== Template exercise delete ======
+  if (e.target.closest('#tplExList .ex-del')) {
+    var delBtn = e.target.closest('#tplExList .ex-del');
+    var row = delBtn.closest('.tpl-ex-row');
+    var container = document.getElementById('tplExList');
+    var rows = container.querySelectorAll('.tpl-ex-row');
+    if (rows.length <= 1) {
+      showToast('至少需要一個運動項目');
+      return;
+    }
+    row.remove();
+    // re-index
+    container.querySelectorAll('.tpl-ex-row').forEach(function(r, i) {
+      r.dataset.exIdx = i;
+      var d = r.querySelector('.ex-del');
+      if (d) d.dataset.exIdx = i;
+    });
+    return;
+  }
+
+  // ====== Template modal delete ======
+  if (e.target.closest('#tplModalDelete')) {
+    if (editingTplId === null) return;
+    showConfirm(
+      '🗑️ 刪除範本',
+      '確定要刪除這個範本嗎？此操作無法復原。',
+      async function() {
+        DB.remove('templates', editingTplId);
+        document.getElementById('tplModal').classList.remove('show');
+        editingTplId = null;
+        renderTemplates();
+        showToast('🗑️ 範本已刪除');
+      }
+    );
+    return;
+  }
+
+  // ====== Template modal save ======
+  if (e.target.closest('#tplModalSave')) {
+    var name = document.getElementById('tplNameInput').value.trim();
+    if (!name) { showToast('請輸入範本名稱'); return; }
+    var exercises = collectExFromRows();
+    if (exercises.length === 0) { showToast('請輸入至少一個運動項目'); return; }
+    var tpl = { name: name, exercises: exercises };
+    if (editingTplId !== null) tpl.id = editingTplId;
+    DB.put('templates', tpl);
+    document.getElementById('tplModal').classList.remove('show');
+    editingTplId = null;
+    renderTemplates();
+    showToast('✅ 已儲存範本「' + name + '」');
+    return;
+  }
+
+  // ====== Template modal cancel ======
+  if (e.target.closest('#tplModalCancel')) {
+    document.getElementById('tplModal').classList.remove('show');
+    editingTplId = null;
+    return;
+  }
+
+  // ====== Toggle set done ======
+  var chk = e.target.closest('[data-ws-chk]');
+  if (chk) {
+    var parts = chk.dataset.wsChk.split('-');
+    var exIdx = parseInt(parts[0]), setIdx = parseInt(parts[1]);
+    if (currentSession && currentSession.exercises[exIdx] && currentSession.exercises[exIdx].sets[setIdx]) {
+      var wasDone = currentSession.exercises[exIdx].sets[setIdx].done;
+      currentSession.exercises[exIdx].sets[setIdx].done = !wasDone;
+      renderWorkout();
+      // 打勾完成 → 自動開始休息倒數
+      if (!wasDone) {
+        showRestTimer();
+        restTimerStart();
+      }
+    }
+    return;
+  }
+
+  // ====== Delete set ======
+  var delSet = e.target.closest('[data-ws-del]');
+  if (delSet) {
+    var parts = delSet.dataset.wsDel.split('-');
+    var exIdx = parseInt(parts[0]), setIdx = parseInt(parts[1]);
+    if (currentSession && currentSession.exercises[exIdx] && currentSession.exercises[exIdx].sets.length > 1) {
+      currentSession.exercises[exIdx].sets.splice(setIdx, 1);
+      renderWorkout();
+    } else if (currentSession) {
+      showToast('至少需要保留一組');
+    }
+    return;
+  }
+
+  // ====== Add set ======
+  var addSet = e.target.closest('[data-ws-add]');
+  if (addSet) {
+    var exIdx = parseInt(addSet.dataset.wsAdd);
+    if (currentSession && currentSession.exercises[exIdx]) {
+      var sets = currentSession.exercises[exIdx].sets;
+      var lastSet = sets[sets.length - 1];
+      currentSession.exercises[exIdx].sets.push({
+        reps: lastSet ? lastSet.reps : 10,
+        weight: lastSet ? lastSet.weight : 60,
+        done: false
+      });
+      renderWorkout();
+    }
+    return;
+  }
+
+  // ====== Rest / Timer ======
+  if (e.target.closest('#wsRest')) {
+    if (!currentSession) return;
+    showRestTimer();
+    return;
+  }
+
+  // ====== Finish / Cancel ======
+  if (e.target.closest('#wsFinish')) { finishWorkout(); return; }
+  if (e.target.closest('#wsCancel')) { cancelWorkout(); return; }
+
+  // ====== Rest Timer Modal ======
+  if (e.target.closest('#rtCancel')) {
+    restTimerClose();
+    return;
+  }
+  if (e.target.closest('#rtStart')) {
+    if (restTimer.sec <= 0 && !restTimer.run) {
+      restTimerClose();
+      return;
+    }
+    restTimerStart();
+    return;
+  }
+  if (e.target.closest('#restTimerModal .modal-overlay')) {
+    // clicking overlay = same as cancel
+    if (!e.target.closest('.modal-box')) {
+      restTimerClose();
+      return;
+    }
+  }
+
+  // ====== Settings: rest seconds input ======
+  // Handled via input event below
+
+  // ====== History: delete record ======
+  var delHist = e.target.closest('[data-ws-del-hist]');
+  if (delHist) {
+    var wid = parseInt(delHist.dataset.wsDelHist);
+    showConfirm('🗑️ 刪除記錄', '確定要刪除此訓練記錄？', function() {
+      DB.remove('workouts', wid);
+      recalcPR();
+      renderHistory();
+      showToast('記錄已刪除');
+    });
+    return;
+  }
+
+  // ====== Settings: reset data ======
+  if (e.target.closest('#resetDataBtn')) {
+    showConfirm(
+      '⚠️ 重設所有資料',
+      '確定要刪除所有範本、訓練紀錄和 PR 排行榜資料？此操作無法復原！',
+      function() {
+        DB._store = { templates: [], workouts: [], pr_records: [] };
+        DB._autoId = { templates: 1, workouts: 1 };
+        DB._save();
+        renderTemplates();
+        renderHistory();
+        renderPR();
+        renderSettings();
+        showToast('🗑️ 所有資料已刪除');
+      }
+    );
+    return;
+  }
+
+  // ====== Confirm modal ======
+  if (e.target.closest('#confirmCancel')) {
+    document.getElementById('confirmModal').classList.remove('show');
+  }
+
+});
+
+// ====== Confirm helper ======
+function showConfirm(title, msg, onOk) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent = msg;
+  document.getElementById('confirmModal').classList.add('show');
+  // 移除舊的 event listener
+  var okBtn = document.getElementById('confirmOk');
+  var newOk = okBtn.cloneNode(true);
+  okBtn.parentNode.replaceChild(newOk, okBtn);
+  newOk.addEventListener('click', function handler() {
+    document.getElementById('confirmModal').classList.remove('show');
+    onOk();
+  });
+}
+
+/* ===================================================================
+   Init
+   =================================================================== */
+async function init() {
+  DB.init();
+  renderTemplates();
+  renderHistory();
+  renderPR();
+
+  // ====== Settings: rest seconds input ======
+  document.addEventListener('input', function(e) {
+    var repsIn = e.target.closest('[data-ws-set-reps]');
+    if (repsIn) {
+      var parts = repsIn.dataset.wsSetReps.split('-');
+      var ei = parseInt(parts[0]), si = parseInt(parts[1]);
+      if (currentSession && currentSession.exercises[ei] && currentSession.exercises[ei].sets[si]) {
+        currentSession.exercises[ei].sets[si].reps = parseInt(repsIn.value) || 0;
+      }
+      return;
+    }
+    var wtIn = e.target.closest('[data-ws-set-wt]');
+    if (wtIn) {
+      var parts = wtIn.dataset.wsSetWt.split('-');
+      var ei = parseInt(parts[0]), si = parseInt(parts[1]);
+      if (currentSession && currentSession.exercises[ei] && currentSession.exercises[ei].sets[si]) {
+        currentSession.exercises[ei].sets[si].weight = parseFloat(wtIn.value) || 0;
+      }
+      return;
+    }
+    var restIn = e.target.closest('#restSecInput');
+    if (restIn) {
+      var val = parseInt(restIn.value) || 90;
+      if (val < 5) val = 5;
+      localStorage.setItem('wt_restSeconds', val);
+    }
+  });
+
+  // 自動隱藏網址列（滾動 1px）
+  window.scrollTo(0, 1);
+  setTimeout(function() { window.scrollTo(0, 1); }, 300);
+
+  // 強制校正真實可視高度（解決網址列一直顯示的問題）
+  function fixHeight() {
+    var h = window.innerHeight + 'px';
+    document.querySelector('.app').style.height = h;
+    document.body.style.height = h;
+  }
+  fixHeight();
+  window.addEventListener('resize', fixHeight);
+}
+
+init();
+
+})();
 </script>
 </body>
 </html>
